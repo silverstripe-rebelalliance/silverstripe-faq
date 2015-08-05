@@ -1,0 +1,8 @@
+{
+    "require": {
+        "silverstripe/fulltextsearch": "^1.1"
+    },
+    "require-dev": {
+        "silverstripe/fulltextsearch-localsolr": "dev-master"
+    }
+}
