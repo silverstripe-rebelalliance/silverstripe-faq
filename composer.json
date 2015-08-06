@@ -1,4 +1,27 @@
 {
+	"name": "silverstripe/faq",
+	"description": "Provides Q & A pages and search",
+	"type": "silverstripe-module",
+	"homepage": "https://code.platform.silverstripe.com/supervillains/silverstripe-faq",
+	"keywords": ["silverstripe", "search", "faq"],
+    "license": "BSD-3-Clause",
+	"support": {
+		"issues": "https://code.platform.silverstripe.com/supervillains/silverstripe-faq/issues"
+	},
+	"authors": [
+		{
+			"name": "wgodfrey",
+			"email": "wilfred@silverstripe.com"
+		},
+		{
+			"name": "drivera",
+			"email": "denise@silverstripe.com"
+		},
+		{
+			"name": "benmanu",
+			"email": "ben@silverstripe.com"
+		}
+	],
     "require": {
         "silverstripe/fulltextsearch": "^1.1"
     },
