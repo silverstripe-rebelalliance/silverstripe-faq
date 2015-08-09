@@ -23,9 +23,9 @@
 		}
 	],
     "require": {
-        "silverstripe/fulltextsearch": "^1.1"
+        "silverstripe/fulltextsearch": "^1.1",
+        "silverstripe/fulltextsearch-localsolr": "dev-master"
     },
     "require-dev": {
-        "silverstripe/fulltextsearch-localsolr": "dev-master"
     }
 }

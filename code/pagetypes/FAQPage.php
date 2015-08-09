@@ -14,5 +14,11 @@ class FAQPage extends Page {
  *
  */
 class FAQPage_Controller extends Page_Controller {
+	public function getFAQs() {
+		return FAQ::get();
+	}
 
+	public function index() {
+		return $this->renderWith(array('FAQPage', 'Page'));
+	}
 }
