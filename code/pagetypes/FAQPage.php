@@ -14,7 +14,7 @@ class FAQPage extends Page {
  *
  */
 class FAQPage_Controller extends Page_Controller {
-	private static $allowed_actions = array('search');
+	private static $allowed_actions = array('SearchForm', 'results');
 	public static $search_index_class = 'FAQSearchIndex';
 	public static $classes_to_search = array(
 		array(
@@ -31,34 +31,96 @@ class FAQPage_Controller extends Page_Controller {
 		return $this->renderWith(array('FAQPage', 'Page'));
 	}
 	
-	
-	public function search($request) {
-		$query = new SearchQuery();
-		$query->classes = self::$classes_to_search;
-		$query->search($request->getVar('Search'));
-		//$query->exclude('SiteTree_ShowInSearch', 0);
+	public function SearchForm() {
+		$searchText =  _t('SearchForm.SEARCH', 'Search');
 
-		$results = '';
-		try {
-			$result = singleton(self::$search_index_class)->search(
-				$query,
-				0,
-				2,
-				array(
-					'hl' => 'true',
-					'spellcheck' => 'true',
-					'spellcheck.collate' => 'true'
-				)
-			);
-	
-			$results = $result->Matches;
-			$suggestion = $result->Suggestion;
-		} catch(Exception $e) {
-			SS_Log::log($e, SS_Log::WARN);
+		if($this->owner->request && $this->owner->request->getVar('Search')) {
+			$searchText = $this->owner->request->getVar('Search');
 		}
-		
-		return $this->customise(new ArrayData(array(
-			'SearchResults' => $results
-		)))->renderWith(array('FAQPage', 'Page'));
+
+		$fields = new FieldList(
+			TextField::create('Search', false, $searchText)
+		);
+		$actions = new FieldList(
+			new FormAction('results', _t('SearchForm.GO', 'Go'))
+		);
+
+		$form = new SearchForm($this->owner, 'SearchForm', $fields, $actions);
+		$form->setFormAction($this->Link().'SearchForm');
+
+		return $form;
+	}
+	
+	
+	public function results($data, $form, $request) {
+		$start = isset($data['start']) ? $data['start'] : 0;
+		$limit = self::$results_per_page;
+		$results = new ArrayList();
+		$suggestion = null;
+		$keywords = empty($data['Search']) ? '' : $data['Search'];
+
+		if($keywords) {
+			$query = new SearchQuery();
+			$query->classes = self::$classes_to_search;
+			$query->search($keywords);
+
+			// Artificially lower the amount of results to prevent too high resource usage.
+			// on subsequent canView check loop.
+			$query->limit(100);
+
+			try {
+				$result = singleton(self::$search_index_class)->search(
+					$query,
+					$start,
+					$limit,
+					array(
+						'hl' => 'true',
+						'spellcheck' => 'true',
+						'spellcheck.collate' => 'true'
+					)
+				);
+
+				$results = $result->Matches;
+				$suggestion = $result->Suggestion;
+			} catch(Exception $e) {
+				SS_Log::log($e, SS_Log::WARN);
+			}
+		}
+
+		// Clean up the results.
+		foreach($results as $result) {
+			if(!$result->canView()) $results->remove($result);
+		}
+
+		// Generate links
+		$searchURL = Director::absoluteURL(Controller::join_links(
+			Director::baseURL(),
+			'search/SearchForm?Search='.rawurlencode($keywords)
+		));
+		$rssUrl = Controller::join_links($searchURL, '?format=rss');
+		RSSFeed::linkToFeed($rssUrl, 'Search results for "' . $keywords . '"');
+		$atomUrl = Controller::join_links($searchURL, '?format=atom');
+		CwpAtomFeed::linkToFeed($atomUrl, 'Search results for "' . $keywords . '"');
+
+		$data = array(
+			'PdfLink' => '',
+			'SearchResults' => $results,
+			'Suggestion' => DBField::create_field('Text', $suggestion),
+			'Query' => DBField::create_field('Text', $keywords),
+			'SearchLink' => DBField::create_field('Text', $searchURL),
+			'Title' => _t('SearchForm.SearchResults', 'Search Results'),
+			'RSSLink' => DBField::create_field('Text', $rssUrl),
+			'AtomLink' => DBField::create_field('Text', $atomUrl)
+		);
+
+		$templates = array('FAQPage', 'Page');
+		if ($request->getVar('format') == 'rss') {
+			array_unshift($templates, 'Page_results_rss');
+		}
+		if ($request->getVar('format') == 'atom') {
+			array_unshift($templates, 'Page_results_atom');
+		}
+
+		return $this->owner->customise($data)->renderWith($templates);
 	}
 }

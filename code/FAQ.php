@@ -22,8 +22,4 @@ class FAQ extends DataObject {
 	public function getCMSValidator() {
 		return new RequiredFields('Question', 'Answer');
 	}
-
-	public function getShowInSearch() {
-        return 1;
-    }
 }
