@@ -1,4 +1,4 @@
-<phpunit bootstrap="framework/tests/bootstrap.php" colors="true">
+<phpunit bootstrap="../framework/tests/bootstrap.php" colors="true">
     <testsuites>
         <testsuite name="CWP FAQ Module Test Suite">
             <directory>tests/unit</directory>
@@ -6,6 +6,6 @@
     </testsuites>
 
     <listeners>
-        <listener class="SS_TestListener" file="framework/dev/TestListener.php" />
+        <listener class="SS_TestListener" file="../framework/dev/TestListener.php" />
     </listeners>
 </phpunit>

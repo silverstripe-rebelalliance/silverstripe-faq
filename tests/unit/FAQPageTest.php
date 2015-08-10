@@ -23,5 +23,4 @@ class FAQPageTest extends FunctionalTest {
 		// faq page should load..
 		$this->assertEquals(200, $page->getStatusCode());
 	}
-
 }
