@@ -24,9 +24,13 @@ class FAQPageTest extends FunctionalTest {
 		
 		// check that page without search term shows form
 		$response = Director::test('faq-page-1');
-		$this->assertTrue(strpos($response2->getBody(), 'FAQ Page 1') !== false);
+		$this->assertTrue(strpos($response->getBody(), 'id="FAQSearchForm_FAQSearchForm_Search"') !== false);
 		
-		// check that page with search term doesn't show title or content, but form and search results
+		// TODO this when basic template is done
+		// check that page with search term doesn't show form and search results
+		//$response = Director::test('faq-page-1/search?Search="test"');
+		//$this->assertTrue(strpos($response2->getBody(), 'id="FAQSearchForm_FAQSearchForm_Search"') !== false);
+		//$this->assertTrue(strpos($response2->getBody(), 'id="FAQSearchForm_FAQSearchForm_Search"') !== false);
 	}
 	
 	public function testView() {
