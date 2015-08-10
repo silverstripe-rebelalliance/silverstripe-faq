@@ -23,4 +23,7 @@ class FAQ extends DataObject {
 		return new RequiredFields('Question', 'Answer');
 	}
 
+	public function getShowInSearch() {
+        return 1;
+    }
 }

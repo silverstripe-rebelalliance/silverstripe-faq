@@ -12,7 +12,7 @@ class FAQPageTest extends FunctionalTest {
 		$page->publish('Stage', 'Live');
 
 		$this->controller = Injector::inst()->create('FAQPage_Controller');
-	}
+    }
 
 	/**
 	 * Basic load page test
