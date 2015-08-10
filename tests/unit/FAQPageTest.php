@@ -22,9 +22,9 @@ class FAQPageTest extends FunctionalTest {
 		$page = $this->get('faq-page-1/');
 		$this->assertEquals(200, $page->getStatusCode());
 		
-		// check that page without search term shows title, content and form
+		// check that page without search term shows form
 		$response = Director::test('faq-page-1');
-		$this->assertTrue(strpos($response2->getBody(), '<head') !== false);
+		$this->assertTrue(strpos($response2->getBody(), 'FAQ Page 1') !== false);
 		
 		// check that page with search term doesn't show title or content, but form and search results
 	}

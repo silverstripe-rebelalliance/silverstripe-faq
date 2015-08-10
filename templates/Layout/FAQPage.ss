@@ -1,3 +1,3 @@
 $Title
 $Content
-$SearchForm
+$FAQSearchForm

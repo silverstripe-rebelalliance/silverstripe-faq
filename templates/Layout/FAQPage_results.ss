@@ -1,4 +1,4 @@
-$SearchForm
+$FAQSearchForm
 <% if $SearchResults %>
     <% loop $SearchResults %>
         <% include FAQSearchResult %>

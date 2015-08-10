@@ -14,7 +14,7 @@ class FAQPage extends Page {
  *
  */
 class FAQPage_Controller extends Page_Controller {
-	private static $allowed_actions = array('SearchForm', 'results', 'view');
+	private static $allowed_actions = array('search', 'results', 'view');
 	public static $search_index_class = 'FAQSearchIndex';
 	public static $classes_to_search = array(
 		array(
@@ -23,9 +23,9 @@ class FAQPage_Controller extends Page_Controller {
 		)
 	);
 
-	public function index() {
-		return $this->renderWith(array('FAQPage', 'Page'));
-	}
+	//public function index() {
+	//	return $this->renderWith(array('FAQPage', 'Page'));
+	//}
 	
 	public function view() {
 		// TODO slug
@@ -38,22 +38,28 @@ class FAQPage_Controller extends Page_Controller {
 		return array('FAQ' => $faq);
 	}
 	
-	public function SearchForm() {
-		$searchText =  _t('SearchForm.SEARCH', 'Search');
-
-		if($this->owner->request && $this->owner->request->getVar('Search')) {
-			$searchText = $this->owner->request->getVar('Search');
+	/**
+	 *
+	 */
+	public function search() {
+		return $this->getFAQSearchForm();
+	}
+	
+	public function getFAQSearchForm() {
+		if($this->request && $this->request->getVar('Search')) {
+			$searchText = $this->request->getVar('Search');
 		}
 
 		$fields = new FieldList(
-			TextField::create('Search', false, $searchText)
+			TextField::create('Search', false, 'Search FAQ')
 		);
 		$actions = new FieldList(
-			new FormAction('results', _t('SearchForm.GO', 'Go'))
+			new FormAction('results', 'Search')
 		);
 
-		$form = new SearchForm($this->owner, 'SearchForm', $fields, $actions);
-		$form->setFormAction($this->Link().'SearchForm');
+		$form = new SearchForm($this, 'FAQSearchForm', $fields, $actions);
+		$form->setFormAction($this->Link().'search');
+		$form->setTemplate('FAQSearchForm');
 
 		return $form;
 	}
