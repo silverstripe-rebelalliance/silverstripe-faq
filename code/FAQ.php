@@ -10,4 +10,12 @@ class FAQ extends DataObject {
 		'Question' => 'Varchar(255)',
 		'Answer' => 'HTMLText'
 	);
+
+	/**
+	 * Set required fields for model form submition.
+	 */
+	public function getCMSValidator() {
+		return new RequiredFields('Question', 'Answer');
+	}
+
 }
