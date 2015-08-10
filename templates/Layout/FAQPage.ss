@@ -1,3 +1,3 @@
 $Title
 $Content
-$FAQSearchForm
+<% include FAQSearchForm %>
