@@ -41,7 +41,7 @@ class FAQPage_Controller extends Page_Controller {
 
 	/*
 	 * Renders the base search page if no search term is present.
-	 * Otherwise runs a searcha nd renders the search results page.
+	 * Otherwise runs a search and renders the search results page.
 	 * Search action taken from BasePage.php and modified.
 	 */
 	public function index() {
