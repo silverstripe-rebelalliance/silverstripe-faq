@@ -120,7 +120,7 @@ class FAQPage_Controller extends Page_Controller {
 			'AtomLink' => DBField::create_field('Text', $atomUrl)
 		);
 
-		$templates = array('FAQPage', 'Page');
+		$templates = array('FAQPage_results', 'Page');
 		if ($request->getVar('format') == 'rss') {
 			array_unshift($templates, 'Page_results_rss');
 		}
