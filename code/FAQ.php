@@ -11,6 +11,11 @@ class FAQ extends DataObject {
 		'Answer' => 'HTMLText'
 	);
 
+	private static $summary_fields = array(
+		'Question',
+		'Answer' => 'Answer.Summary'
+	);
+
 	/**
 	 * Set required fields for model form submition.
 	 */
