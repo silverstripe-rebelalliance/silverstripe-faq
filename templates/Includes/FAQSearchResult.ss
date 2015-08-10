@@ -2,6 +2,7 @@
 <div>
     <h1><a href="#">$Question</a></h1>
     <p>
-        $Answer
+        $Answer.RichLinks.LimitCharacters(80)
     </p>
+    <a href="$Link">Link to the full page</a>
 </div>

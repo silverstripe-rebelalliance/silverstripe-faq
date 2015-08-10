@@ -5,11 +5,7 @@
     $SearchForm
 <% if $SearchResults %>
     <% loop $SearchResults %>
-    <div>
-        <h1><a href="#">$Question</a></h1>
-        <p>
-            $Answer
-        </p>
-    </div>
+        <% include FAQSearchResult %>
     <% end_loop %>
 <% end_if %>
+

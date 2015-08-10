@@ -14,7 +14,7 @@ class FAQPage extends Page {
  *
  */
 class FAQPage_Controller extends Page_Controller {
-	private static $allowed_actions = array('SearchForm', 'results');
+	private static $allowed_actions = array('SearchForm', 'results', 'view');
 	public static $search_index_class = 'FAQSearchIndex';
 	public static $classes_to_search = array(
 		array(
@@ -22,13 +22,20 @@ class FAQPage_Controller extends Page_Controller {
 			'includeSubclasses' => true
 		)
 	);
-	
-	public function getFAQs() {
-		return FAQ::get();
-	}
 
 	public function index() {
 		return $this->renderWith(array('FAQPage', 'Page'));
+	}
+	
+	public function view() {
+		// TODO slug
+		$faq = FAQ::get()->filter('ID', $this->request->param('ID'))->first();
+		
+		if ($faq === null) {
+			$this->httpError(404);
+		}
+		
+		return array('FAQ' => $faq);
 	}
 	
 	public function SearchForm() {

@@ -15,6 +15,12 @@ class FAQ extends DataObject {
 		'Question',
 		'Answer' => 'Answer.Summary'
 	);
+	
+	public function getLink() {
+		//TODO not this
+		$faqPage = FAQPage::get()->first();
+		return $faqPage->Link()."view/".$this->ID;
+	}
 
 	/**
 	 * Set required fields for model form submition.
