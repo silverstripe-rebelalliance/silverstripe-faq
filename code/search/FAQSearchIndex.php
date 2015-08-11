@@ -2,12 +2,29 @@
 /**
  * The saddest Solr index in history
  */
-class FAQSearchIndex extends SolrIndex {
+class FAQSearchIndex extends CwpSearchIndex {
+	/**
+	 *
+	 */
 	public function init() {
 		$this->addClass('FAQ');
         $this->addFulltextField('Question');
 		$this->addFulltextField('Answer');
 		parent::init();
-
+	}
+	
+	/**
+	 * Overwrite extra paths function to only use the path defined on the yaml file
+	 * We can create/overwrite new .txt templates for only this index
+	 */
+	public function getExtrasPath() {
+		// get options from configuration
+		$options = Config::inst()->get('FAQSearchIndex', 'options');
+		
+		$globalOptions = Solr::solr_options();
+		if (isset($options['extraspath']) && file_exists($options['extraspath'])) {
+			$globalOptions['extraspath'] = $options['extraspath'];
+		}
+		return $this->extrasPath ? $this->extrasPath : $globalOptions['extraspath'];
 	}
 }
