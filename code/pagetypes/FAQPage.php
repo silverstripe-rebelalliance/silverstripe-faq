@@ -63,9 +63,10 @@ class FAQPage_Controller extends Page_Controller {
 			return $this->render();
 		// otherwise do search
 		} else {
+			$searchKeywords = preg_replace('/\?$/', '\?', $keywords); // stop Solr breaking questions
 			$query = new SearchQuery();
 			$query->classes = self::$classes_to_search;
-			$query->search($keywords);
+			$query->search($searchKeywords);
 
 			// Artificially lower the amount of results to prevent too high resource usage.
 			// on subsequent canView check loop.
