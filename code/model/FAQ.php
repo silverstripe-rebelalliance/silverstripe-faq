@@ -8,8 +8,19 @@
 class FAQ extends DataObject {
 	private static $db = array(
 		'Question' => 'Varchar(255)',
-		'Answer' => 'HTMLText'
+		'Answer' => 'HTMLText',
+		'Keywords' => 'Text'
 	);
+
+	/**
+	 * Search boost defaults for fields.
+	 *
+	 * @var config
+	 * @string 
+	 */
+	private static $question_boost = '4';
+	private static $answer_boost = '1';
+	private static $keywords_boost = '3';
 
 	private static $summary_fields = array(
 		'Question',

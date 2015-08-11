@@ -77,6 +77,7 @@ class FAQPage_Controller extends Page_Controller {
 					$start,
 					$limit,
 					array(
+						'defType' => 'edismax',
 						'hl' => 'true',
 						'spellcheck' => 'true',
 						'spellcheck.collate' => 'true'

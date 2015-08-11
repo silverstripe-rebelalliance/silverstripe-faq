@@ -8,9 +8,12 @@ class FAQSearchIndex extends CwpSearchIndex {
 	 */
 	public function init() {
 		$this->addClass('FAQ');
-        $this->addFulltextField('Question');
+		$this->addFulltextField('Question');
 		$this->addFulltextField('Answer');
-		parent::init();
+		$this->addFulltextField('Keywords');
+		$this->setFieldBoosting('FAQ_Question', FAQ::config()->question_boost);
+		$this->setFieldBoosting('FAQ_Answer', FAQ::config()->answer_boost);
+		$this->setFieldBoosting('FAQ_Keywords', FAQ::config()->keywords_boost);
 	}
 	
 	/**
