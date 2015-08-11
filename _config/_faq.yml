@@ -1,0 +1,3 @@
+CwpSolr:
+  options:
+    extraspath: '../faq/conf/extras'
