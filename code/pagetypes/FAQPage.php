@@ -19,8 +19,15 @@ class FAQPage_Controller extends Page_Controller {
 	public static $search_term_key = 'q';
 	public static $search_field_placeholder = 'Ask a question';
 	public static $search_field_title = 'Ask a question';
+	public static $search_results_title = 'FAQ Results';
+	public static $search_button_value = 'Search';
+	public static $search_results_summary_current_page_key = '%CurrentPage%';
+	public static $search_results_summary_total_pages_key = '%TotalPages%';
+	public static $search_results_summary_query_key = '%Query%';
+	public static $search_results_summary = 'Displaying %CurrentPage% of %TotalPages% pages for "%Query%"';
 	public static $no_results_message = 'We couldn\'t find an answer to your question. Maybe try asking it in a different way, or check your spelling.';
-	
+	public static $search_result_more_link = 'Read more';
+
 	public static $search_index_class = 'FAQSearchIndex';
 	public static $classes_to_search = array(
 		array(
@@ -98,12 +105,29 @@ class FAQPage_Controller extends Page_Controller {
 			$atomUrl = Controller::join_links($searchURL, '?format=atom');
 			CwpAtomFeed::linkToFeed($atomUrl, 'Search results for "' . $keywords . '"');
 
+			/**
+			 * generate the search summary using string replacement
+			 * to support translation and max configurability
+			 */
+			$searchSummary = _t('FAQPage.SearchResultsSummary', self::$search_results_summary);
+			$keys = array(
+				self::$search_results_summary_current_page_key,
+				self::$search_results_summary_total_pages_key,
+				self::$search_results_summary_query_key
+			);
+			$values = array(
+				$results->CurrentPage(),
+				$results->TotalPages(),
+				$keywords
+			);
+			$searchSummary = str_replace($keys, $values, $searchSummary);
+
 			$renderData = array(
 				'SearchResults' => $results,
+				'SearchSummary' => $searchSummary,
 				'Suggestion' => DBField::create_field('Text', $suggestion),
 				'Query' => DBField::create_field('Text', $keywords),
 				'SearchLink' => DBField::create_field('Text', $searchURL),
-				'SearchTitle' => _t('SearchForm.SearchResults', 'Search Results'),
 				'RSSLink' => DBField::create_field('Text', $rssUrl),
 				'AtomLink' => DBField::create_field('Text', $atomUrl)
 			);
@@ -121,15 +145,24 @@ class FAQPage_Controller extends Page_Controller {
 	}
 
 	public function getSearchFieldPlaceholder() {
-		return self::$search_field_placeholder;
+		return _t('FAQPage.SearchFieldPlaceholder', self::$search_field_placeholder);
 	}
 	public function getSearchFieldTitle() {
-		return self::$search_field_title;
+		return _t('FAQPage.SearchFieldTitle', self::$search_field_title);
+	}
+	public function getSearchButtonValue() {
+		return _t('FAQPage.SearchButtonValue', self::$search_button_value);
 	}
 	public function getNoResultsMessage() {
-		return self::$no_results_message;
+		return _t('FAQPage.NoResultsMessage', self::$no_results_message);
 	}
 	public function getSearchTermKey() {
-		return self::$search_term_key;
+		return _t('FAQPage.SearchTermKey', self::$search_term_key);
+	}
+	public function getSearchResultsTitle() {
+		return _t('FAQPage.SearchResultsTitle', self::$search_results_title);
+	}
+	public function getSearchResultMoreLink() {
+		return _t('FAQPage.SearchResultMoreLink', self::$search_result_more_link);
 	}
 }

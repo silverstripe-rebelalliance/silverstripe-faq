@@ -2,12 +2,12 @@
 <% include FAQSearchForm %>
 <% if $SearchResults %>
     <h1>
-        $SearchTitle
-        <div><small>Displaying $SearchResults.CurrentPage of $SearchResults.TotalPages pages for "$Query"</small></div>
+        $SearchResultsTitle
+        <div><small>$SearchSummary</small></div>
     </h1>
 
     <% loop $SearchResults %>
-        <% include FAQSearchResult %>
+        <% include FAQSearchResult Out=$Up %>
     <% end_loop %>
     <% with SearchResults %>
         <% include Pagination %>

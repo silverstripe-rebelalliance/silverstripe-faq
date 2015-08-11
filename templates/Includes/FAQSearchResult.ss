@@ -3,5 +3,5 @@
     <p>
         $Answer.RichLinks.LimitCharacters(80)
     </p>
-    <a href="$Link">Link to the full page</a>
+    <a href="$Link">$Out.SearchResultMoreLink</a>
 </div>
