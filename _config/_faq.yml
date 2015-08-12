@@ -1,3 +1,7 @@
+---
+Name: faq
+After: 'framework/*','cms/*'
+---
 FAQSearchIndex:
   options:
     extraspath: '../faq/conf/extras'
