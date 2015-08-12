@@ -28,4 +28,5 @@ Television, Televisions, TV, TVs
 pixima => pixma
 
 does, do
+stop, cancel, close, delete, remove, disconnect
 

@@ -18,9 +18,9 @@ class FAQ extends DataObject {
 	 * @var config
 	 * @string 
 	 */
-	private static $question_boost = '4';
+	private static $question_boost = '3';
 	private static $answer_boost = '1';
-	private static $keywords_boost = '3';
+	private static $keywords_boost = '4';
 
 	private static $summary_fields = array(
 		'Question',

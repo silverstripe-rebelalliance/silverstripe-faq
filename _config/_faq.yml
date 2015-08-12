@@ -1,3 +1,4 @@
 FAQSearchIndex:
   options:
     extraspath: '../faq/conf/extras'
+    templatespath: '../faq/conf/templates'
