@@ -28,9 +28,16 @@ class FAQ extends DataObject {
 	);
 	
 	public function getLink() {
-		//TODO not this
 		$faqPage = FAQPage::get()->first();
-		return $faqPage->Link()."view/".$this->ID;
+		if ($faqPage->exists()) {
+			return Controller::join_links(
+				$faqPage->Link(),
+				"view/",
+				$this->ID
+			);
+		} else {
+			return '';
+		}
 	}
 
 	/**
