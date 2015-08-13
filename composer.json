@@ -23,7 +23,9 @@
         }
     ],
     "require": {
-        "silverstripe/fulltextsearch": "dev-master"
+		"cwp/cwp": "1.1.0",
+		"cwp/cwp-core": "dev-master#3e26cd3fba5ee0588121351e71513c50260fa751",
+        "silverstripe/fulltextsearch": "dev-master#f2f16ae863a7281f7db1c17c0bd29cb09c18aa68"
         
     },
     "require-dev": {
