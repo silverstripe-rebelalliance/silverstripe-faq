@@ -27,8 +27,19 @@ class FAQ extends DataObject {
 		'Answer' => 'Answer.Summary'
 	);
 	
+	/**
+	 * Set required fields for model form submition.
+	 */
+	public function getCMSValidator() {
+		return new RequiredFields('Question', 'Answer');
+	}
+
+	/**
+	 * @return String  Link to view this particular FAQ on the current FAQPage.
+	 */
 	public function getLink() {
-		$faqPage = FAQPage::get()->first();
+		$faqPage = Controller::curr();
+
 		if ($faqPage->exists()) {
 			return Controller::join_links(
 				$faqPage->Link(),
@@ -41,9 +52,15 @@ class FAQ extends DataObject {
 	}
 
 	/**
-	 * Set required fields for model form submition.
+	 * @return String  The "Read more" link text for the current FAQPage.
 	 */
-	public function getCMSValidator() {
-		return new RequiredFields('Question', 'Answer');
+	public function getMoreLinkText() {
+		$faqPage = Controller::curr();
+
+		if ($faqPage->exists()) {
+			return $faqPage->MoreLinkText;
+		} else {
+			return '';
+		}
 	}
 }

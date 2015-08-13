@@ -3,5 +3,5 @@
     <p>
         $Answer.RichLinks.LimitCharacters(80)
     </p>
-    <a href="$Link">$Out.MoreLinkText</a>
+    <a href="$Link">$MoreLinkText</a>
 </div>

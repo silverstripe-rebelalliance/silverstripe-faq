@@ -7,7 +7,7 @@
     </h1>
 
     <% loop $SearchResults %>
-        <% include FAQSearchResult Out=$Up %>
+        <% include FAQSearchResult %>
     <% end_loop %>
     <% with SearchResults %>
         <% include Pagination %>
