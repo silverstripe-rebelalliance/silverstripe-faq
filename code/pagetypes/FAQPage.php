@@ -10,7 +10,7 @@ class FAQPage extends Page {
 		'SearchFieldPlaceholder' => 'Text',
 		'SearchResultsSummary' => 'Text',
 		'SearchResultsTitle' => 'Text',
-		'SearchButtonValue' => 'Text',
+		'SearchButtonText' => 'Text',
 		'NoResultsMessage' => 'Text',
 		'MoreLinkText' => 'Text'
 	);
@@ -19,7 +19,7 @@ class FAQPage extends Page {
 		'SearchFieldPlaceholder' => 'Ask us a question',
 		'SearchResultsSummary' => 'Displaying %CurrentPage% of %TotalPages% pages for "%Query%"',
 		'SearchResultsTitle' => 'FAQ Results',
-		'SearchButtonValue' => 'Search',
+		'SearchButtonText' => 'Search',
 		'NoResultsMessage' => 'We couldn\'t find an answer to your question. Maybe try asking it in a different way, or check your spelling.',
 		'MoreLinkText' => 'Read more'
 	);
@@ -35,7 +35,7 @@ class FAQPage extends Page {
 			TextField::create('SearchFieldPlaceholder')
 				->setDescription('Text to appear in the search field before the user enters their question'),
 
-			TextField::create('SearchButtonValue')
+			TextField::create('SearchButtonText')
 				->setDescription('Text for the search button'),
 
 			TextField::create('SearchResultsTitle')
@@ -245,8 +245,8 @@ class FAQPage_Controller extends Page_Controller {
 	public function SearchFieldPlaceholder() {
 		return _t('FAQPage.SearchFieldPlaceholder', $this->SearchFieldPlaceholder);
 	}
-	public function SearchButtonValue() {
-		return _t('FAQPage.SearchButtonValue', $this->SearchButtonValue);
+	public function SearchButtonText() {
+		return _t('FAQPage.SearchButtonText', $this->SearchButtonText);
 	}
 	public function NoResultsMessage() {
 		return _t('FAQPage.NoResultsMessage', $this->NoResultsMessage);
