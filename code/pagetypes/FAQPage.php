@@ -5,9 +5,68 @@
  * Can live in any part of the SiteTree
  */
 class FAQPage extends Page {
+
+	private static $db = array(
+		'SearchFieldPlaceholder' => 'Text',
+		'SearchResultsSummary' => 'Text',
+		'SearchResultsTitle' => 'Text',
+		'SearchButtonValue' => 'Text',
+		'NoResultsMessage' => 'Text',
+		'MoreLinkText' => 'Text'
+	);
+
+	static $defaults = array(
+		'SearchFieldPlaceholder' => 'Ask us a question',
+		'SearchResultsSummary' => 'Displaying %CurrentPage% of %TotalPages% pages for "%Query%"',
+		'SearchResultsTitle' => 'FAQ Results',
+		'SearchButtonValue' => 'Search',
+		'NoResultsMessage' => 'We couldn\'t find an answer to your question. Maybe try asking it in a different way, or check your spelling.',
+		'MoreLinkText' => 'Read more'
+	);
+
 	private static $singular_name = 'FAQ Page';
 
 	private static $description = 'FAQ search page';
+
+	public function getCMSFields() {
+		$fields = parent::getCMSFields();
+		$fields->addFieldsToTab('Root.Main', array(
+
+			TextField::create('SearchFieldPlaceholder')
+				->setDescription('Text to appear in the search field before the user enters their question'),
+
+			TextField::create('SearchButtonValue')
+				->setDescription('Text for the search button'),
+
+			TextField::create('SearchResultsTitle')
+				->setDescription('Title for the FAQ search results'),
+
+			TextareaField::create('NoResultsMessage')
+				->setDescription('Text to appear when no search results are found'),
+
+			TextField::create('MoreLinkText')
+				->setDescription('Text for the "Read more" link below each search result'),
+
+			TextareaField::create('SearchResultsSummary')
+				->setDescription('
+					Search summary string. Replacement keys: 
+					<ul>
+						<li>
+							<strong>%CurrentPage%</strong>: Current page number
+						</li>
+						<li>
+							<strong>%TotalPages%</strong>: Total page count
+						</li>
+						<li>
+							<strong>%Query%</strong>: Current search query
+						</li>
+					</ul>
+				')
+
+		), 'Metadata');
+		return $fields;
+	}
+
 }
 
 /**
@@ -17,16 +76,9 @@ class FAQPage_Controller extends Page_Controller {
 	private static $allowed_actions = array('view');
 
 	public static $search_term_key = 'q';
-	public static $search_field_placeholder = 'Ask a question';
-	public static $search_field_title = 'Ask a question';
-	public static $search_results_title = 'FAQ Results';
-	public static $search_button_value = 'Search';
 	public static $search_results_summary_current_page_key = '%CurrentPage%';
 	public static $search_results_summary_total_pages_key = '%TotalPages%';
 	public static $search_results_summary_query_key = '%Query%';
-	public static $search_results_summary = 'Displaying %CurrentPage% of %TotalPages% pages for "%Query%"';
-	public static $no_results_message = 'We couldn\'t find an answer to your question. Maybe try asking it in a different way, or check your spelling.';
-	public static $search_result_more_link = 'Read more';
 
 	public static $search_index_class = 'FAQSearchIndex';
 	public static $classes_to_search = array(
@@ -111,7 +163,7 @@ class FAQPage_Controller extends Page_Controller {
 			 * generate the search summary using string replacement
 			 * to support translation and max configurability
 			 */
-			$searchSummary = _t('FAQPage.SearchResultsSummary', self::$search_results_summary);
+			$searchSummary = _t('FAQPage.SearchResultsSummary', $this->SearchResultsSummary);
 			$keys = array(
 				self::$search_results_summary_current_page_key,
 				self::$search_results_summary_total_pages_key,
@@ -146,25 +198,22 @@ class FAQPage_Controller extends Page_Controller {
 		}
 	}
 
-	public function getSearchFieldPlaceholder() {
-		return _t('FAQPage.SearchFieldPlaceholder', self::$search_field_placeholder);
+	public function SearchFieldPlaceholder() {
+		return _t('FAQPage.SearchFieldPlaceholder', $this->SearchFieldPlaceholder);
 	}
-	public function getSearchFieldTitle() {
-		return _t('FAQPage.SearchFieldTitle', self::$search_field_title);
+	public function SearchButtonValue() {
+		return _t('FAQPage.SearchButtonValue', $this->SearchButtonValue);
 	}
-	public function getSearchButtonValue() {
-		return _t('FAQPage.SearchButtonValue', self::$search_button_value);
+	public function NoResultsMessage() {
+		return _t('FAQPage.NoResultsMessage', $this->NoResultsMessage);
 	}
-	public function getNoResultsMessage() {
-		return _t('FAQPage.NoResultsMessage', self::$no_results_message);
+	public function SearchTermKey() {
+		return self::$search_term_key;
 	}
-	public function getSearchTermKey() {
-		return _t('FAQPage.SearchTermKey', self::$search_term_key);
+	public function SearchResultsTitle() {
+		return _t('FAQPage.SearchResultsTitle', $this->SearchResultsTitle);
 	}
-	public function getSearchResultsTitle() {
-		return _t('FAQPage.SearchResultsTitle', self::$search_results_title);
-	}
-	public function getSearchResultMoreLink() {
-		return _t('FAQPage.SearchResultMoreLink', self::$search_result_more_link);
+	public function SearchResultMoreLink() {
+		return _t('FAQPage.SearchResultMoreLink', $this->MoreLinkText);
 	}
 }
