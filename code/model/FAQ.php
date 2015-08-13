@@ -11,31 +11,41 @@ class FAQ extends DataObject {
 		'Answer' => 'HTMLText',
 		'Keywords' => 'Text'
 	);
-
-	/**
-	 * Search boost defaults for fields.
-	 *
-	 * @var config
-	 * @string 
-	 */
-	private static $question_boost = '3';
-	private static $answer_boost = '1';
-	private static $keywords_boost = '4';
-
+	
 	private static $summary_fields = array(
 		'Question',
 		'Answer' => 'Answer.Summary'
 	);
+
+	/**
+	 * Search boost defaults for fields.
+	 *
+	 * @config
+	 * @var config
+	 * @string 
+	 */
+	private static $question_boost = '3';
 	
 	/**
-	 * Set required fields for model form submition.
+	 * @config
+	 */
+	private static $answer_boost = '1';
+	
+	/**
+	 * @config
+	 */
+	private static $keywords_boost = '4';
+	
+	/**
+	 * Set required fields for model form submission.
 	 */
 	public function getCMSValidator() {
 		return new RequiredFields('Question', 'Answer');
 	}
 
 	/**
-	 * @return String  Link to view this particular FAQ on the current FAQPage.
+	 * Gets a link to the view page for each FAQ
+	 * @return string Link to view this particular FAQ on the current FAQPage.
 	 */
 	public function getLink() {
 		$faqPage = Controller::curr();
@@ -46,21 +56,21 @@ class FAQ extends DataObject {
 				"view/",
 				$this->ID
 			);
-		} else {
-			return '';
 		}
+		
+		return '';
 	}
 
 	/**
-	 * @return String  The "Read more" link text for the current FAQPage.
+	 * @return string "Read more" link text for the current FAQPage.
 	 */
 	public function getMoreLinkText() {
 		$faqPage = Controller::curr();
 
 		if ($faqPage->exists()) {
 			return $faqPage->MoreLinkText;
-		} else {
-			return '';
 		}
+		
+		return '';
 	}
 }

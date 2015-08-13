@@ -1,10 +1,13 @@
 <?php
 /**
- * The saddest Solr index in history
+ * Custom solr search index. Extends {@see CwpSearchIndex}
+ * and adds customization capabilities to change solr configuration (.solr folder) only for this index.
+ * Uses a loose search.
  */
 class FAQSearchIndex extends CwpSearchIndex {
+	
 	/**
-	 *
+	 * Adds FAQ fields to the index
 	 */
 	public function init() {
 		$this->addClass('FAQ');
@@ -19,6 +22,7 @@ class FAQSearchIndex extends CwpSearchIndex {
 	/**
 	 * Overwrite extra and template paths functions to only use the path defined on the yaml file
 	 * We can create/overwrite new .txt templates for only this index
+	 * @see SolrIndex::getExtrasPath
 	 */
 	public function getExtrasPath() {
 		// get options from configuration
@@ -43,6 +47,7 @@ class FAQSearchIndex extends CwpSearchIndex {
 
 	/**
 	 * Overloaded to remove compulsory matching on all words
+	 * @see SolrIndex::getQueryComponent
 	 */
 	protected function getQueryComponent(SearchQuery $searchQuery, &$hlq = array()) {
 		$q = array();

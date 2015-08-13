@@ -14,7 +14,7 @@ This module provides FAQ functionality on top of Solr for CWP 1.1.*.
 
  * CWP 1.1.0
  * CWP-core branch master, commit 3e26cd3fba5ee0588121351e71513c50260fa751
- * Fulltextsearch module, branch master, commit f2f16ae863a7281f7db1c17c0bd29cb09c18aa68
+ * Fulltextsearch module, branch master, commit 1683f776bd45fc69299a6268aeba3e8542d8a992
 
 When the versions for cwp-core and silverstripe-fulltextsearch get tagged, the requirements for this module will change
 to that stable versions.
@@ -53,13 +53,16 @@ The module comes with its own Solr search index, customized to have a fuzzy sear
 ## Quickstart
 
 1. Add a FAQPage to your CMS
+
 ![](docs/images/faq-pagetype.png)
 
 2. Add an FAQ on the FAQ ModelAdmin sidebar link
+
 ![](docs/images/faq-modeladmin.png)
 
 3. Wait for Solr to reindex
 4. Search your FAQ page :)
+
 ![](docs/images/faq-frontend.png)
 
 ## Configuration
@@ -81,6 +84,11 @@ FAQSearchIndex:
   options:
     extraspath: 'new/path/to/extrapath'
     templatespath: 'new/path/to/template'
+	
+FAQ:
+  question_boost: '5'
+  answer_boost: '6'
+  keywords_boost: '3'
 ```
 
 ## TODO
