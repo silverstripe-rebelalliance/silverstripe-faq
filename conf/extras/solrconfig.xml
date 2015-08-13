@@ -1280,6 +1280,7 @@
     </lst>
 
 	<!-- Custom spellcheck dictionary limited to an optional _spellcheckText field -->
+    <!-- RETURN TO DEFAULTS WHEN USING A LARGER DATASET -->
     <lst name="spellchecker">
       <str name="name">_spellcheck</str>
       <str name="field">_spellcheckText</str>
@@ -1287,7 +1288,7 @@
       <!-- the spellcheck distance measure used, the default is the internal levenshtein -->
       <str name="distanceMeasure">internal</str>
       <!-- minimum accuracy needed to be considered a valid spellcheck suggestion -->
-      <float name="accuracy">0.5</float>
+      <float name="accuracy">0</float>
       <!-- the maximum #edits we consider when enumerating terms: can be 1 or 2 -->
       <int name="maxEdits">2</int>
       <!-- the minimum shared prefix when enumerating terms -->
@@ -1295,9 +1296,9 @@
       <!-- maximum number of inspections per result. -->
       <int name="maxInspections">5</int>
       <!-- minimum length of a query term to be considered for correction -->
-      <int name="minQueryLength">4</int>
+      <int name="minQueryLength">1</int>
       <!-- maximum threshold of documents a query term can appear to be considered for correction -->
-      <float name="maxQueryFrequency">0.01</float>
+      <float name="maxQueryFrequency">0</float>
       <!-- uncomment this to require suggestions to occur in 1% of the documents
       	<float name="thresholdTokenFrequency">.01</float>
       -->

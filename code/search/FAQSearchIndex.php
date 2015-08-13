@@ -10,15 +10,25 @@ class FAQSearchIndex extends CwpSearchIndex {
 	 * Adds FAQ fields to the index
 	 */
 	public function init() {
+		// Add classes
 		$this->addClass('FAQ');
+
+		// Add fields
 		$this->addFulltextField('Question');
 		$this->addFulltextField('Answer');
 		$this->addFulltextField('Keywords');
+
+		// Add field boosting
 		$this->setFieldBoosting('FAQ_Question', FAQ::config()->question_boost);
 		$this->setFieldBoosting('FAQ_Answer', FAQ::config()->answer_boost);
 		$this->setFieldBoosting('FAQ_Keywords', FAQ::config()->keywords_boost);
+
+		// Copy relevant fields to spellchecker index
+		$this->addCopyField('FAQ_Question', '_spellcheckText');
+		$this->addCopyField('FAQ_Answer', '_spellcheckText');
+		$this->addCopyField('FAQ_Keywords', '_spellcheckText');
 	}
-	
+
 	/**
 	 * Overwrite extra and template paths functions to only use the path defined on the yaml file
 	 * We can create/overwrite new .txt templates for only this index

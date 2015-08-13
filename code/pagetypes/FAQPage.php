@@ -22,7 +22,7 @@ class FAQPage extends Page {
 		'SearchResultsTitle' => 'FAQ Results',
 		'SearchButtonText' => 'Search',
 		'NoResultsMessage' => 'We couldn\'t find an answer to your question. Maybe try asking it in a different way, or check your spelling.',
-		'SearchNotAvailable' => 'Sorry, we currently aren\'t able to search the website for you. Please try again later.',
+		'SearchNotAvailable' => 'We are currently unable to search the website for you. Please try again later.',
 		'MoreLinkText' => 'Read more'
 	);
 
@@ -132,19 +132,19 @@ class FAQPage_Controller extends Page_Controller {
 		$start = $this->request->getVar('start') or 0;
 		$limit = self::$results_per_page;
 		$results = new ArrayList();
-		$suggestion = null;
+		$suggestionData = null;
 		$keywords = $this->request->getVar(self::$search_term_key) or '';
 
 		// get search query
 		$query = $this->getSearchQuery($keywords);
 		try {
-			$this->doSearch($results, $suggestion, $query, $start, $limit, $keywords);
+			$this->doSearch($results, $suggestionData, $query, $start, $limit, $keywords);
 		} catch(Exception $e) {
 			SS_Log::log($e, SS_Log::WARN);
 			return $this->renderError();
 		}
 
-		return $this->renderSearch($results, $suggestion, $keywords);
+		return $this->renderSearch($results, $suggestionData, $keywords);
 	}
 
 	/**
@@ -168,9 +168,9 @@ class FAQPage_Controller extends Page_Controller {
 
 	/**
 	 * Performs a search against the configured Solr index from a given query, start and limit.
-	 * Returns $result and $suggestion - both of with are passed by reference.
+	 * Returns $result and $suggestionData - both of which are passed by reference.
 	 */
-	protected function doSearch(&$results, &$suggestion, $query, $start, $limit) {
+	protected function doSearch(&$results, &$suggestionData, $query, $start, $limit) {
 		$result = singleton(self::$search_index_class)->search(
 			$query,
 			$start,
@@ -179,31 +179,34 @@ class FAQPage_Controller extends Page_Controller {
 				'defType' => 'edismax',
 				'hl' => 'true',
 				'spellcheck' => 'true',
-				'spellcheck.collate' => 'true'
+				'spellcheck.collate' => 'true',
+				'spellcheck.dictionary' => '_spellcheck'
 			)
 		);
 
 		// these are both passed by reference and are returned.
 		$results = $result->Matches;
-		$suggestion = $result->Suggestion;
+		$suggestionData = array(
+			'Suggestion' => $result->Suggestion,
+			'SuggestionNice' => $result->SuggestionNice,
+			'SuggestionQueryString' => $this->makeQueryLink($result->SuggestionQueryString)
+		);
 	}
 
 	/**
-	 * Renders the search template from a given Solr search result, suggestion and search term.
+	 * Renders the search template from a given Solr search result, suggestionData and search term.
 	 * @return HTMLText search results template.
 	 */
-	protected function renderSearch($results, $suggestion, $keywords) {
+	protected function renderSearch($results, $suggestionData, $keywords) {
+		$searchSummary = '';
+
 		// Clean up the results.
 		foreach($results as $result) {
 			if(!$result->canView()) $results->remove($result);
 		}
 
 		// Generate links
-		$searchURL = Director::absoluteURL(Controller::join_links(
-			Director::baseURL(),
-			$this->Link(),
-			sprintf('?%s=', self::$search_term_key).rawurlencode($keywords)
-		));
+		$searchURL = Director::absoluteURL($this->makeQueryLink(urlencode($keywords)));
 		$rssUrl = Controller::join_links($searchURL, '?format=rss');
 		RSSFeed::linkToFeed($rssUrl, 'Search results for "' . $keywords . '"');
 		$atomUrl = Controller::join_links($searchURL, '?format=atom');
@@ -213,23 +216,25 @@ class FAQPage_Controller extends Page_Controller {
 		 * generate the search summary using string replacement
 		 * to support translation and max configurability
 		 */
-		$searchSummary = _t('FAQPage.SearchResultsSummary', $this->SearchResultsSummary);
-		$keys = array(
-			self::$search_results_summary_current_page_key,
-			self::$search_results_summary_total_pages_key,
-			self::$search_results_summary_query_key
-		);
-		$values = array(
-			$results->CurrentPage(),
-			$results->TotalPages(),
-			$keywords
-		);
-		$searchSummary = str_replace($keys, $values, $searchSummary);
+		if ($results->CurrentPage) {
+			$searchSummary = _t('FAQPage.SearchResultsSummary', $this->SearchResultsSummary);
+			$keys = array(
+				self::$search_results_summary_current_page_key,
+				self::$search_results_summary_total_pages_key,
+				self::$search_results_summary_query_key
+			);
+			$values = array(
+				$results->CurrentPage(),
+				$results->TotalPages(),
+				$keywords
+			);
+			$searchSummary = str_replace($keys, $values, $searchSummary);
+		}
 
 		$renderData = array(
 			'SearchResults' => $results,
 			'SearchSummary' => $searchSummary,
-			'Suggestion' => DBField::create_field('Text', $suggestion),
+			'SearchSuggestion' => $suggestionData,
 			'Query' => DBField::create_field('Text', $keywords),
 			'SearchLink' => DBField::create_field('Text', $searchURL),
 			'RSSLink' => DBField::create_field('Text', $rssUrl),
@@ -261,6 +266,20 @@ class FAQPage_Controller extends Page_Controller {
 		return $this->customise(
 						array('SearchError' => true
 					))->renderWith($templates);
+	}
+
+	/**
+	 * Makes a query link for the current page from a search term
+	 * Returns a URL with an empty search term if no query is passed
+	 * @return String  The URL for this search query
+	 */
+	public function makeQueryLink($query = null) {
+		$query = gettype($query) === 'string' ? $query : '';
+		return Controller::join_links(
+			Director::baseURL(),
+			$this->Link(),
+			sprintf('?%s=', self::$search_term_key)
+		) . $query;
 	}
 
 	/**
