@@ -93,5 +93,5 @@ FAQ:
 
 ## TODO
 
-- Get static config variables from yml files
+- Get static config variables from yml files for controller
 - Pagetypes, search index and dataobjects easily extendable

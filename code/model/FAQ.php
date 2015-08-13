@@ -50,7 +50,7 @@ class FAQ extends DataObject {
 	public function getLink() {
 		$faqPage = Controller::curr();
 
-		if ($faqPage->exists()) {
+		if ($faqPage->exists() && $this->ID != 0) {
 			return Controller::join_links(
 				$faqPage->Link(),
 				"view/",
@@ -67,7 +67,7 @@ class FAQ extends DataObject {
 	public function getMoreLinkText() {
 		$faqPage = Controller::curr();
 
-		if ($faqPage->exists()) {
+		if ($faqPage->exists() && $faqPage->ClassName === 'FAQPage') {
 			return $faqPage->MoreLinkText;
 		}
 		

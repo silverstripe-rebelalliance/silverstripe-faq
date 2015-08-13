@@ -33,14 +33,16 @@ class FAQPageTest extends FunctionalTest {
 		$response = Director::test('faq-page-1');
 		$this->assertTrue(strpos($response->getBody(), 'id="FAQSearchForm_FAQSearchForm_Search"') !== false);
 		
-		// TODO this when basic template is done
-		// check that page with search term doesn't show form and search results
-		//$response = Director::test('faq-page-1/search?Search="test"');
-		//$this->assertTrue(strpos($response2->getBody(), 'id="FAQSearchForm_FAQSearchForm_Search"') !== false);
-		//$this->assertTrue(strpos($response2->getBody(), 'id="FAQSearchForm_FAQSearchForm_Search"') !== false);
+		// check that page with search term shows form and search results (solr not available error)
+		$response = Director::test(sprintf('faq-page-1/?%s=test', FAQPage_Controller::$search_term_key));
+		$this->assertTrue(strpos($response->getBody(), 'id="FAQSearchForm_FAQSearchForm_Search"') !== false);
+		
+		// CHECK this isn't working
+		//$this->assertTrue(strpos($response->getBody(), FAQPage::$defaults['SearchNotAvailable']) !== false);
 	}
 	
 	/**
+	 * Tests individual view  for FAQ
 	 * TODO: change after slug change
 	 */
 	public function testView() {
@@ -60,7 +62,20 @@ class FAQPageTest extends FunctionalTest {
 		$this->assertTrue(strpos($response->getBody(), 'No imagination question') !== false);
 	}
 	
-	public function testResults() {
-		//test
+	/**
+	 *
+	 */
+	public function testSearch() {
+		Phockito::include_hamcrest();
+		$faq = new FAQ(array('Question' => 'question 1', 'Answer' => 'answer 1'));
+		$result = new ArrayList(array($faq));
+		$mockResponse = new PaginatedList($result);
+
+		// setup the spy
+		$spy = Phockito::spy('FAQPage_Controller');
+		Phockito::when($spy)->doSearch($mockResponse, anything(), anything(), anything(), anything())->return($mockResponse);
+		
+		$response = Director::test(sprintf('faq-page-1/?%s=test', FAQPage_Controller::$search_term_key));
+Debug::dump($response);
 	}
 }

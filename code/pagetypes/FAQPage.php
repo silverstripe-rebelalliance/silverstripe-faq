@@ -7,20 +7,22 @@
 class FAQPage extends Page {
 
 	private static $db = array(
-		'SearchFieldPlaceholder' => 'Text',
-		'SearchResultsSummary' => 'Text',
-		'SearchResultsTitle' => 'Text',
-		'SearchButtonText' => 'Text',
-		'NoResultsMessage' => 'Text',
-		'MoreLinkText' => 'Text'
+		'SearchFieldPlaceholder' => 'Varchar(124)',
+		'SearchResultsSummary' => 'Varchar(255)',
+		'SearchResultsTitle' => 'Varchar(255)',
+		'SearchButtonText' => 'Varchar(124)',
+		'NoResultsMessage' => 'Varchar(255)',
+		'SearchNotAvailable' => 'Varchar(255)',
+		'MoreLinkText' => 'Varchar(124)'
 	);
 
-	static $defaults = array(
+	public static $defaults = array(
 		'SearchFieldPlaceholder' => 'Ask us a question',
 		'SearchResultsSummary' => 'Displaying %CurrentPage% of %TotalPages% pages for "%Query%"',
 		'SearchResultsTitle' => 'FAQ Results',
 		'SearchButtonText' => 'Search',
 		'NoResultsMessage' => 'We couldn\'t find an answer to your question. Maybe try asking it in a different way, or check your spelling.',
+		'SearchNotAvailable' => 'Sorry, we currently aren\'t able to search the website for you. Please try again later.',
 		'MoreLinkText' => 'Read more'
 	);
 
@@ -43,6 +45,9 @@ class FAQPage extends Page {
 
 			TextareaField::create('NoResultsMessage')
 				->setDescription('Text to appear when no search results are found'),
+				
+			TextareaField::create('SearchNotAvailable')
+				->setDescription('Text to appear when search functionality is not available'),
 
 			TextField::create('MoreLinkText')
 				->setDescription('Text for the "Read more" link below each search result'),
@@ -90,6 +95,23 @@ class FAQPage_Controller extends Page_Controller {
 		)
 	);
 
+	/*
+	 * Renders the base search page if no search term is present.
+	 * Otherwise runs a search and renders the search results page.
+	 * Search action taken from BasePage.php and modified.
+	 */
+	public function index() {
+		if($this->request->getVar(self::$search_term_key)) {
+			return $this->search();
+		}
+		
+		return $this->render();
+	}
+	
+	/**
+	 * Render individual view for FAQ
+	 * @return FAQ|404 error if faq not found
+	 */
 	public function view() {
 		$faq = FAQ::get()->filter('ID', $this->request->param('ID'))->first();
 		
@@ -100,20 +122,7 @@ class FAQPage_Controller extends Page_Controller {
 		return array('FAQ' => $faq);
 	}
 
-	/*
-	 * Renders the base search page if no search term is present.
-	 * Otherwise runs a search and renders the search results page.
-	 * Search action taken from BasePage.php and modified.
-	 */
-	public function index() {
-		// render normally if no search term
-		if(!$this->request->getVar(self::$search_term_key)) {
-			return $this->render();
-		// otherwise do search
-		} else {
-			return $this->search();
-		}
-	}
+
 
 	/**
 	 * Search function. Called from index() if we have a search term.
@@ -128,22 +137,21 @@ class FAQPage_Controller extends Page_Controller {
 
 		// get search query
 		$query = $this->getSearchQuery($keywords);
-
 		try {
 			$this->doSearch($results, $suggestion, $query, $start, $limit, $keywords);
 		} catch(Exception $e) {
 			SS_Log::log($e, SS_Log::WARN);
+			return $this->renderError();
 		}
 
 		return $this->renderSearch($results, $suggestion, $keywords);
-
 	}
 
 	/**
 	 * Builds a search query from a give search term.
 	 * @return SearchQuery
 	 */
-	public function getSearchQuery($keywords) {
+	protected function getSearchQuery($keywords) {
 		// stop Solr breaking questions
 		$searchKeywords = preg_replace('/\?$/', '\?', $keywords);
 		
@@ -162,7 +170,7 @@ class FAQPage_Controller extends Page_Controller {
 	 * Performs a search against the configured Solr index from a given query, start and limit.
 	 * Returns $result and $suggestion - both of with are passed by reference.
 	 */
-	public function doSearch(&$results, &$suggestion, $query, $start, $limit) {
+	protected function doSearch(&$results, &$suggestion, $query, $start, $limit) {
 		$result = singleton(self::$search_index_class)->search(
 			$query,
 			$start,
@@ -184,7 +192,7 @@ class FAQPage_Controller extends Page_Controller {
 	 * Renders the search template from a given Solr search result, suggestion and search term.
 	 * @return HTMLText search results template.
 	 */
-	public function renderSearch($results, $suggestion, $keywords) {
+	protected function renderSearch($results, $suggestion, $keywords) {
 		// Clean up the results.
 		foreach($results as $result) {
 			if(!$result->canView()) $results->remove($result);
@@ -237,6 +245,22 @@ class FAQPage_Controller extends Page_Controller {
 		}
 
 		return $this->owner->customise($renderData)->renderWith($templates);
+	}
+	
+	/**
+	 * Displays an error only if something went wrong with solr search
+	 */
+	protected function renderError() {
+		$templates = array('FAQPage_results', 'Page');
+		if ($this->request->getVar('format') == 'rss') {
+			array_unshift($templates, 'Page_results_rss');
+		}
+		if ($this->request->getVar('format') == 'atom') {
+			array_unshift($templates, 'Page_results_atom');
+		}
+		return $this->customise(
+						array('SearchError' => true
+					))->renderWith($templates);
 	}
 
 	/**
