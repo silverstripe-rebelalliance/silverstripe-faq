@@ -75,7 +75,9 @@ class FAQPage extends Page {
 class FAQPage_Controller extends Page_Controller {
 	private static $allowed_actions = array('view');
 
+	// This is the string used for the url search term variable. E.g. "searchterm" in "http://mysite/faq?searchterm=this+is+a+search"
 	public static $search_term_key = 'q';
+	// We replace these keys with real data in the SearchResultsSummary before adding to the template.
 	public static $search_results_summary_current_page_key = '%CurrentPage%';
 	public static $search_results_summary_total_pages_key = '%TotalPages%';
 	public static $search_results_summary_query_key = '%Query%';
