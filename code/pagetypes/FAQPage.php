@@ -22,7 +22,7 @@ class FAQPage extends Page {
 		'SearchResultsTitle' => 'FAQ Results',
 		'SearchButtonText' => 'Search',
 		'NoResultsMessage' => 'We couldn\'t find an answer to your question. Maybe try asking it in a different way, or check your spelling.',
-		'SearchNotAvailable' => 'Sorry, we currently aren\'t able to search the website for you. Please try again later.',
+		'SearchNotAvailable' => 'We are currently unable to search the website for you. Please try again later.',
 		'MoreLinkText' => 'Read more'
 	);
 
@@ -132,7 +132,7 @@ class FAQPage_Controller extends Page_Controller {
 		$start = $this->request->getVar('start') or 0;
 		$limit = self::$results_per_page;
 		$results = new ArrayList();
-		$suggestion = null;
+		$suggestionData = null;
 		$keywords = $this->request->getVar(self::$search_term_key) or '';
 		$renderData = array();
 
@@ -142,8 +142,12 @@ class FAQPage_Controller extends Page_Controller {
 			$searchResult = $this->doSearch($query, $start, $limit);
 
 			$results = $searchResult->Matches;
-			$suggestion = $searchResult->Suggestion;
-			$renderData = $this->parseSearchResults($results, $suggestion, $keywords);
+			$suggestionData = array(
+				'Suggestion' => $searchResult->Suggestion,
+				'SuggestionNice' => $searchResult->SuggestionNice,
+				'SuggestionQueryString' => $this->makeQueryLink($searchResult->SuggestionQueryString)
+			);
+			$renderData = $this->parseSearchResults($results, $suggestionData, $keywords);
 		} catch(Exception $e) {
 			$renderData = array('SearchError' => true);
 			SS_Log::log($e, SS_Log::WARN);
@@ -173,7 +177,7 @@ class FAQPage_Controller extends Page_Controller {
 
 	/**
 	 * Performs a search against the configured Solr index from a given query, start and limit.
-	 * Returns $result and $suggestion - both of with are passed by reference.
+	 * Returns $result and $suggestionData - both of which are passed by reference.
 	 */
 	public function doSearch($query, $start, $limit) {
 		$result = singleton(self::$search_index_class)->search(
@@ -232,7 +236,7 @@ class FAQPage_Controller extends Page_Controller {
 		$renderData = array(
 			'SearchResults' => $results,
 			'SearchSummary' => $searchSummary,
-			'Suggestion' => DBField::create_field('Text', $suggestion),
+			'SearchSuggestion' => $suggestion,
 			'Query' => DBField::create_field('Text', $keywords),
 			'SearchLink' => DBField::create_field('Text', $searchURL),
 			'RSSLink' => DBField::create_field('Text', $rssUrl),
@@ -258,6 +262,20 @@ class FAQPage_Controller extends Page_Controller {
 	}
 	
 	
+	/**
+	 * Makes a query link for the current page from a search term
+	 * Returns a URL with an empty search term if no query is passed
+	 * @return String  The URL for this search query
+	 */
+	public function makeQueryLink($query = null) {
+		$query = gettype($query) === 'string' ? $query : '';
+		return Controller::join_links(
+			Director::baseURL(),
+			$this->Link(),
+			sprintf('?%s=', self::$search_term_key)
+		) . $query;
+	}
+
 	/**
 	 * Expose variables to the template - both statics and data objects, and make the translatable where relevant.
 	 */

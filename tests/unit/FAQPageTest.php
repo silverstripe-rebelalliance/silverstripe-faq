@@ -79,7 +79,7 @@ class FAQPageTest extends FunctionalTest {
 		$spy = Phockito::spy('FAQPage_Controller');
 		Phockito::when($spy)->doSearch(anything(), anything(), anything())->return(new ArrayData($mockResponse));
 		$response = $spy->search();
-		$this->assertTrue($response['Suggestion']->Value === $mockResponse['Suggestion']);
+		$this->assertTrue($response['SearchSuggestion']['Suggestion'] === $mockResponse['Suggestion']);
 		
 		// testing error with solr
 		$spy1 = Phockito::spy('FAQPage_Controller');

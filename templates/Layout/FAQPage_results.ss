@@ -1,16 +1,21 @@
 <h1>$Title</h1>
 <% include FAQSearchForm %>
 
-
 <% if $SearchError %>
 	$SearchNotAvailable
 <% else %>
-	<% if $SearchResults %>
-		<h1>
-			$SearchResultsTitle
+	<h1>
+		$SearchResultsTitle
+		<% if $SearchResults %>
 			<div><small>$SearchSummary</small></div>
-		</h1>
-	
+		<% end_if %>
+	</h1>
+
+	<% if $SearchSuggestion.Suggestion %>
+		<p>Did you mean <a href="$SearchSuggestion.SuggestionQueryString">$SearchSuggestion.SuggestionNice</a>?</p>
+	<% end_if %>
+
+	<% if $SearchResults %>
 		<% loop $SearchResults %>
 			<% include FAQSearchResult %>
 		<% end_loop %>
@@ -18,11 +23,9 @@
 			<% include Pagination %>
 		<% end_with %>
 	<% else %>
-		<h1>
-			$SearchTitle
-		</h1>
 		$NoResultsMessage
 	<% end_if %>
+
 <% end_if %>
 
 
