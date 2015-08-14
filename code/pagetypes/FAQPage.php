@@ -16,7 +16,7 @@ class FAQPage extends Page {
 		'MoreLinkText' => 'Varchar(124)'
 	);
 
-	public static $defaults = array(
+	private static $defaults = array(
 		'SearchFieldPlaceholder' => 'Ask us a question',
 		'SearchResultsSummary' => 'Displaying %CurrentPage% of %TotalPages% pages for "%Query%"',
 		'SearchResultsTitle' => 'FAQ Results',
@@ -102,7 +102,7 @@ class FAQPage_Controller extends Page_Controller {
 	 */
 	public function index() {
 		if($this->request->getVar(self::$search_term_key)) {
-			return $this->search();
+			return $this->renderSearch($this->search());
 		}
 		
 		return $this->render();
@@ -134,17 +134,22 @@ class FAQPage_Controller extends Page_Controller {
 		$results = new ArrayList();
 		$suggestion = null;
 		$keywords = $this->request->getVar(self::$search_term_key) or '';
+		$renderData = array();
 
 		// get search query
 		$query = $this->getSearchQuery($keywords);
 		try {
-			$this->doSearch($results, $suggestion, $query, $start, $limit, $keywords);
+			$searchResult = $this->doSearch($query, $start, $limit);
+
+			$results = $searchResult->Matches;
+			$suggestion = $searchResult->Suggestion;
+			$renderData = $this->parseSearchResults($results, $suggestion, $keywords);
 		} catch(Exception $e) {
+			$renderData = array('SearchError' => true);
 			SS_Log::log($e, SS_Log::WARN);
-			return $this->renderError();
 		}
 
-		return $this->renderSearch($results, $suggestion, $keywords);
+		return $renderData;
 	}
 
 	/**
@@ -170,7 +175,7 @@ class FAQPage_Controller extends Page_Controller {
 	 * Performs a search against the configured Solr index from a given query, start and limit.
 	 * Returns $result and $suggestion - both of with are passed by reference.
 	 */
-	protected function doSearch(&$results, &$suggestion, $query, $start, $limit) {
+	public function doSearch($query, $start, $limit) {
 		$result = singleton(self::$search_index_class)->search(
 			$query,
 			$start,
@@ -183,16 +188,14 @@ class FAQPage_Controller extends Page_Controller {
 			)
 		);
 
-		// these are both passed by reference and are returned.
-		$results = $result->Matches;
-		$suggestion = $result->Suggestion;
+		return $result;
 	}
 
 	/**
 	 * Renders the search template from a given Solr search result, suggestion and search term.
 	 * @return HTMLText search results template.
 	 */
-	protected function renderSearch($results, $suggestion, $keywords) {
+	protected function parseSearchResults($results, $suggestion, $keywords) {
 		// Clean up the results.
 		foreach($results as $result) {
 			if(!$result->canView()) $results->remove($result);
@@ -236,21 +239,13 @@ class FAQPage_Controller extends Page_Controller {
 			'AtomLink' => DBField::create_field('Text', $atomUrl)
 		);
 
-		$templates = array('FAQPage_results', 'Page');
-		if ($this->request->getVar('format') == 'rss') {
-			array_unshift($templates, 'Page_results_rss');
-		}
-		if ($this->request->getVar('format') == 'atom') {
-			array_unshift($templates, 'Page_results_atom');
-		}
-
-		return $this->owner->customise($renderData)->renderWith($templates);
+		return $renderData;
 	}
 	
 	/**
-	 * Displays an error only if something went wrong with solr search
+	 * Sets a template and displays data
 	 */
-	protected function renderError() {
+	protected function renderSearch($renderData) {
 		$templates = array('FAQPage_results', 'Page');
 		if ($this->request->getVar('format') == 'rss') {
 			array_unshift($templates, 'Page_results_rss');
@@ -258,11 +253,11 @@ class FAQPage_Controller extends Page_Controller {
 		if ($this->request->getVar('format') == 'atom') {
 			array_unshift($templates, 'Page_results_atom');
 		}
-		return $this->customise(
-						array('SearchError' => true
-					))->renderWith($templates);
-	}
 
+		return $this->customise($renderData)->renderWith($templates);
+	}
+	
+	
 	/**
 	 * Expose variables to the template - both statics and data objects, and make the translatable where relevant.
 	 */

@@ -20,7 +20,7 @@ class FAQSearchIndex extends CwpSearchIndex {
 	}
 	
 	/**
-	 * Overwrite extra and template paths functions to only use the path defined on the yaml file
+	 * Overwrite extra paths functions to only use the path defined on the yaml file
 	 * We can create/overwrite new .txt templates for only this index
 	 * @see SolrIndex::getExtrasPath
 	 */
@@ -34,7 +34,12 @@ class FAQSearchIndex extends CwpSearchIndex {
 		}
 		return $this->extrasPath ? $this->extrasPath : $globalOptions['extraspath'];
 	}
-	function getTemplatesPath() {
+	
+	/**
+	 * Overwrite template paths to only use the path defined on the yaml file
+	 * @see SolrIndex::getTemplatesPath
+	 */
+	public function getTemplatesPath() {
 		$options = Config::inst()->get('FAQSearchIndex', 'options');
 
 		$globalOptions = Solr::solr_options();
