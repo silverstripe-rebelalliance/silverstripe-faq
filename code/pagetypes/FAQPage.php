@@ -200,17 +200,15 @@ class FAQPage_Controller extends Page_Controller {
 	 * @return HTMLText search results template.
 	 */
 	protected function parseSearchResults($results, $suggestion, $keywords) {
+		$searchSummary = '';
+
 		// Clean up the results.
 		foreach($results as $result) {
 			if(!$result->canView()) $results->remove($result);
 		}
 
 		// Generate links
-		$searchURL = Director::absoluteURL(Controller::join_links(
-			Director::baseURL(),
-			$this->Link(),
-			sprintf('?%s=', self::$search_term_key).rawurlencode($keywords)
-		));
+		$searchURL = Director::absoluteURL($this->makeQueryLink(urlencode($keywords)));
 		$rssUrl = Controller::join_links($searchURL, '?format=rss');
 		RSSFeed::linkToFeed($rssUrl, 'Search results for "' . $keywords . '"');
 		$atomUrl = Controller::join_links($searchURL, '?format=atom');
@@ -220,18 +218,20 @@ class FAQPage_Controller extends Page_Controller {
 		 * generate the search summary using string replacement
 		 * to support translation and max configurability
 		 */
-		$searchSummary = _t('FAQPage.SearchResultsSummary', $this->SearchResultsSummary);
-		$keys = array(
-			self::$search_results_summary_current_page_key,
-			self::$search_results_summary_total_pages_key,
-			self::$search_results_summary_query_key
-		);
-		$values = array(
-			$results->CurrentPage(),
-			$results->TotalPages(),
-			$keywords
-		);
-		$searchSummary = str_replace($keys, $values, $searchSummary);
+		if ($results->CurrentPage) {
+			$searchSummary = _t('FAQPage.SearchResultsSummary', $this->SearchResultsSummary);
+			$keys = array(
+				self::$search_results_summary_current_page_key,
+				self::$search_results_summary_total_pages_key,
+				self::$search_results_summary_query_key
+			);
+			$values = array(
+				$results->CurrentPage(),
+				$results->TotalPages(),
+				$keywords
+			);
+			$searchSummary = str_replace($keys, $values, $searchSummary);
+		}
 
 		$renderData = array(
 			'SearchResults' => $results,
@@ -267,7 +267,7 @@ class FAQPage_Controller extends Page_Controller {
 	 * Returns a URL with an empty search term if no query is passed
 	 * @return String  The URL for this search query
 	 */
-	public function makeQueryLink($query = null) {
+	protected function makeQueryLink($query = null) {
 		$query = gettype($query) === 'string' ? $query : '';
 		return Controller::join_links(
 			Director::baseURL(),
