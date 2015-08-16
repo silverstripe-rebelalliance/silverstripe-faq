@@ -11,7 +11,8 @@ class FAQPageTest extends FunctionalTest {
 		// create faq page
 		$this->_page = new FAQPage(array(
 								'Title' => "FAQ Page 1",
-								'SearchNotAvailable' => 'The SearchIndex is not available'));
+								'SearchNotAvailable' => 'The SearchIndex is not available',
+								'SinglePageLimit' => 2));
 		$this->_page->write();
 		$this->_page->publish('Stage', 'Live');
 		
@@ -34,7 +35,7 @@ class FAQPageTest extends FunctionalTest {
 		$this->assertEquals(200, $page->getStatusCode());
 		
 		// check that page shows form
-		$response = Director::test('faq-page-1');
+		$response = $this->get('faq-page-1');
 		$this->assertTrue(strpos($response->getBody(), 'id="FAQSearchForm_FAQSearchForm_Search"') !== false);
 	}
 	
@@ -51,11 +52,11 @@ class FAQPageTest extends FunctionalTest {
 		$this->assertEquals(404, $page->getStatusCode());
 		
 		// test page body, we have to get the Q and the A
-		$response = Director::test('faq-page-1/view/1');
+		$response = $this->get('faq-page-1/view/1');
 		$this->assertTrue(strpos($response->getBody(), 'question 1') !== false);
 		$this->assertTrue(strpos($response->getBody(), 'Milkyway chocolate bar') !== false);
 		
-		$response = Director::test('faq-page-1/view/2');
+		$response = $this->get('faq-page-1/view/2');
 		$this->assertTrue(strpos($response->getBody(), 'No imagination question') !== false);
 	}
 	
@@ -82,5 +83,27 @@ class FAQPageTest extends FunctionalTest {
 		Phockito::when($spy1)->doSearch(anything(), anything(), anything())->throw(new Exception("Some error"));
 		$response = $spy1->search();
 		$this->assertTrue($response['SearchError'] === true);
+	}
+	
+	/**
+	 * When Single Page limit set, should get limit set of results and no pagination
+	 */
+	public function testSinglePageLimit() {
+		Phockito::include_hamcrest();
+		$result = new ArrayList();
+		$result->push(FAQ::create(array('Question' => 'question 1', 'Answer' => 'answer 1')));
+		$result->push(FAQ::create(array('Question' => 'question 2', 'Answer' => 'answer 2')));
+		$result->push(FAQ::create(array('Question' => 'question 3', 'Answer' => 'answer 3')));
+		$result->push(FAQ::create(array('Question' => 'question 4', 'Answer' => 'answer 4')));
+		$mockResponse = array();
+		$mockResponse['Matches'] = new PaginatedList($result);
+		$mockResponse['Suggestion'] = 'suggestion text';
+
+		// testing total items are equal to set in _page, and there's no more than one page in pagination
+		$spy = Phockito::spy('FAQPage_Controller', $this->_page);
+		Phockito::when($spy)->doSearch(anything(), anything(), anything())->return(new ArrayData($mockResponse));        
+		$response = $spy->search();
+		$this->assertTrue($response['SearchResults']->getTotalItems() === 2);
+		$this->assertFalse($response['SearchResults']->MoreThanOnePage());
 	}
 }

@@ -101,15 +101,7 @@ class FAQPage_Controller extends Page_Controller {
 	 */
 	public function index() {
 		if($this->request->getVar(self::$search_term_key)) {
-			// parse and limit if required by cms config
-			if($this->SinglePageLimit != '0') {
-				$limit = intval($this->SinglePageLimit);
-				$search = $this->search($limit);
-				$search['SearchResults']->setTotalItems($limit);
-			} else {
-				$search = $this->search();
-			}
-			return $this->renderSearch($search);
+			return $this->renderSearch($this->search());
 		}
 		
 		return $this->render();
@@ -135,9 +127,17 @@ class FAQPage_Controller extends Page_Controller {
 	 * Search function. Called from index() if we have a search term.
 	 * @return HTMLText search results template.
 	 */
-	public function search($limit = null) {
+	public function search() {
+		// limit if required by cms config
+		$limit = self::$results_per_page;
+		if($this->SinglePageLimit != '0') {
+			$setlimit = intval($this->SinglePageLimit);
+			If($setlimit != 0 && is_int($setlimit)) {
+				$limit = $setlimit;
+			}
+		}
+
 		$start = $this->request->getVar('start') or 0;
-		$limit = ($limit != 0 && is_int($limit)) ? $limit : self::$results_per_page;
 		$results = new ArrayList();
 		$suggestionData = null;
 		$keywords = $this->request->getVar(self::$search_term_key) or '';
@@ -249,6 +249,12 @@ class FAQPage_Controller extends Page_Controller {
 			'RSSLink' => DBField::create_field('Text', $rssUrl),
 			'AtomLink' => DBField::create_field('Text', $atomUrl)
 		);
+		
+		// remove pagination if required by cms config
+		if($this->SinglePageLimit != '0') {
+			$setlimit = intval($this->SinglePageLimit);
+			$renderData['SearchResults']->setTotalItems($setlimit);
+		}
 
 		return $renderData;
 	}
