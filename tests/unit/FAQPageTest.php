@@ -36,10 +36,6 @@ class FAQPageTest extends FunctionalTest {
 		// check that page shows form
 		$response = Director::test('faq-page-1');
 		$this->assertTrue(strpos($response->getBody(), 'id="FAQSearchForm_FAQSearchForm_Search"') !== false);
-		
-		// check that page with search term shows form and search results (solr not available error)
-		$response = Director::test(sprintf('faq-page-1/?%s=test', FAQPage_Controller::$search_term_key));
-		$this->assertTrue(strpos($response->getBody(), $this->_page->SearchNotAvailable) !== false);
 	}
 	
 	/**

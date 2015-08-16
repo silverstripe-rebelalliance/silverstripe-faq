@@ -7,6 +7,7 @@
 class FAQPage extends Page {
 
 	private static $db = array(
+		'SinglePageLimit' => 'Int',
 		'SearchFieldPlaceholder' => 'Varchar(124)',
 		'SearchResultsSummary' => 'Varchar(255)',
 		'SearchResultsTitle' => 'Varchar(255)',
@@ -17,6 +18,7 @@ class FAQPage extends Page {
 	);
 
 	private static $defaults = array(
+		'SinglePageLimit' => 0,
 		'SearchFieldPlaceholder' => 'Ask us a question',
 		'SearchResultsSummary' => 'Displaying %CurrentPage% of %TotalPages% pages for "%Query%"',
 		'SearchResultsTitle' => 'FAQ Results',
@@ -32,43 +34,40 @@ class FAQPage extends Page {
 
 	public function getCMSFields() {
 		$fields = parent::getCMSFields();
-		$fields->addFieldsToTab('Root.Main', array(
-
+		$settings = new Tab('Settings', 'Settings');
+		$fields->insertBefore($settings, 'PublishingSchedule');
+		$fields->addFieldsToTab('Root.Settings', array(
+			TextField::create('SinglePageLimit')
+					->setDescription('If this is set (and > than 0), the results will show on a single page, '.
+									 'no pagination will be displayed'),
 			TextField::create('SearchFieldPlaceholder')
-				->setDescription('Text to appear in the search field before the user enters their question'),
-
+					 ->setDescription('Text to appear in the search field before the user enters their question'),
 			TextField::create('SearchButtonText')
-				->setDescription('Text for the search button'),
-
+					 ->setDescription('Text for the search button'),
 			TextField::create('SearchResultsTitle')
-				->setDescription('Title for the FAQ search results'),
-
+					 ->setDescription('Title for the FAQ search results'),
 			TextareaField::create('NoResultsMessage')
-				->setDescription('Text to appear when no search results are found'),
-				
+					 ->setDescription('Text to appear when no search results are found'),
 			TextareaField::create('SearchNotAvailable')
-				->setDescription('Text to appear when search functionality is not available'),
-
+					 ->setDescription('Text to appear when search functionality is not available'),
 			TextField::create('MoreLinkText')
-				->setDescription('Text for the "Read more" link below each search result'),
-
+					 ->setDescription('Text for the "Read more" link below each search result'),
 			TextareaField::create('SearchResultsSummary')
-				->setDescription('
-					Search summary string. Replacement keys: 
-					<ul>
-						<li>
-							<strong>%CurrentPage%</strong>: Current page number
-						</li>
-						<li>
-							<strong>%TotalPages%</strong>: Total page count
-						</li>
-						<li>
-							<strong>%Query%</strong>: Current search query
-						</li>
-					</ul>
-				')
-
-		), 'Metadata');
+					->setDescription('
+						Search summary string. Replacement keys: 
+						<ul>
+							<li>
+								<strong>%CurrentPage%</strong>: Current page number
+							</li>
+							<li>
+								<strong>%TotalPages%</strong>: Total page count
+							</li>
+							<li>
+								<strong>%Query%</strong>: Current search query
+							</li>
+						</ul>
+					')
+		));
 		return $fields;
 	}
 
@@ -102,7 +101,15 @@ class FAQPage_Controller extends Page_Controller {
 	 */
 	public function index() {
 		if($this->request->getVar(self::$search_term_key)) {
-			return $this->renderSearch($this->search());
+			// parse and limit if required by cms config
+			if($this->SinglePageLimit != '0') {
+				$limit = intval($this->SinglePageLimit);
+				$search = $this->search($limit);
+				$search['SearchResults']->setTotalItems($limit);
+			} else {
+				$search = $this->search();
+			}
+			return $this->renderSearch($search);
 		}
 		
 		return $this->render();
@@ -128,9 +135,9 @@ class FAQPage_Controller extends Page_Controller {
 	 * Search function. Called from index() if we have a search term.
 	 * @return HTMLText search results template.
 	 */
-	public function search() {
+	public function search($limit = null) {
 		$start = $this->request->getVar('start') or 0;
-		$limit = self::$results_per_page;
+		$limit = ($limit != 0 && is_int($limit)) ? $limit : self::$results_per_page;
 		$results = new ArrayList();
 		$suggestionData = null;
 		$keywords = $this->request->getVar(self::$search_term_key) or '';
