@@ -44,6 +44,17 @@ class FAQ extends DataObject {
 	}
 
 	/**
+	 * Filters items based on member permissions or other criteria,
+	 * such as if a state is generally available for the current record.
+	 * 
+	 * @param Member
+	 * @return Boolean
+	 */
+	public function canView($member = null) {
+		return true;
+	}
+
+	/**
 	 * Gets a link to the view page for each FAQ
 	 * @return string Link to view this particular FAQ on the current FAQPage.
 	 */
