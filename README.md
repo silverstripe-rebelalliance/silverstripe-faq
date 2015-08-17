@@ -86,9 +86,9 @@ FAQSearchIndex:
     templatespath: 'new/path/to/template'
 	
 FAQ:
-  question_boost: '5'
-  answer_boost: '6'
-  keywords_boost: '3'
+  question_boost: '3'
+  answer_boost: '1'
+  keywords_boost: '4'
 ```
 
 ## TODO
