@@ -29,4 +29,5 @@ pixima => pixma
 
 does, do
 stop, cancel, close, delete, remove, disconnect
+phone, mobile
 
