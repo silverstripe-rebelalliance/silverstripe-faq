@@ -100,10 +100,8 @@ class FAQPage extends Page {
 		$components->getComponentByType('GridFieldAddExistingAutocompleter')
 			->setResultsFormat('$Question');
 
-		$fields->findOrMakeTab(
-			'Root.SelectedFAQs',
-			_t('FAQPage.SelectedFAQs','Selected FAQs')
-		);
+		$SelectedFAQsTab = new Tab('SelectedFAQs', _t('FAQPage.SelectedFAQs','Selected FAQs'));
+		$fields->insertBefore($SelectedFAQsTab, 'PublishingSchedule');
 		$fields->addFieldToTab(
 			'Root.SelectedFAQs',
 			GridField::create(
