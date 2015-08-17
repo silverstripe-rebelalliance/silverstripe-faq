@@ -52,8 +52,9 @@ class FAQPage extends Page {
 		$fields->insertBefore($settings, 'PublishingSchedule');
 		$fields->addFieldsToTab('Root.Settings', array(
 			TextField::create('SinglePageLimit')
-					->setDescription('If this is set (and > than 0), the results will show on a single page, '.
-									 'no pagination will be displayed'),
+					->setDescription('
+						If set higher than 0, limits results to that many and removes pagination.
+					'),
 			TextField::create('SearchFieldPlaceholder')
 					 ->setDescription('Text to appear in the search field before the user enters their question'),
 			TextField::create('SearchButtonText')
