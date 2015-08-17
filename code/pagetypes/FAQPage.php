@@ -28,9 +28,23 @@ class FAQPage extends Page {
 		'MoreLinkText' => 'Read more'
 	);
 
+	private static $many_many = array(
+		'SelectedFAQs' => 'FAQ'
+	);
+
+	private static $many_many_extraFields = array(
+		'SelectedFAQs' => array(
+			'SortOrder' => 'Int'
+		)
+	);
+
 	private static $singular_name = 'FAQ Page';
 
 	private static $description = 'FAQ search page';
+
+	public function SelectedFAQs() {
+		return $this->getManyManyComponents('SelectedFAQs')->sort('SortOrder');
+	}
 
 	public function getCMSFields() {
 		$fields = parent::getCMSFields();
@@ -68,6 +82,38 @@ class FAQPage extends Page {
 						</ul>
 					')
 		));
+
+		// Selected FAQs tab
+		$components = GridFieldConfig_RelationEditor::create();
+		$components->removeComponentsByType('GridFieldAddNewButton');
+		$components->removeComponentsByType('GridFieldEditButton');
+		$components->removeComponentsByType('GridFieldFilterHeader');
+		$components->addComponent(new GridFieldSortableRows('SortOrder'));
+
+		$dataColumns = $components->getComponentByType('GridFieldDataColumns');
+		$dataColumns->setDisplayFields(array(
+			'Title' => _t('FAQPage.ColumnQuestion', 'Ref.'),
+			'Question' => _t('FAQPage.ColumnQuestion', 'Question'),
+			'Answer.Summary' => _t('FAQPage.ColumnPageType', 'Answer')
+		));
+
+		$components->getComponentByType('GridFieldAddExistingAutocompleter')
+			->setResultsFormat('$Question');
+
+		$fields->findOrMakeTab(
+			'Root.SelectedFAQs',
+			_t('FAQPage.SelectedFAQs','Selected FAQs')
+		);
+		$fields->addFieldToTab(
+			'Root.SelectedFAQs',
+			GridField::create(
+				'SelectedFAQs',
+				_t('FAQPage.SelectedFAQs','Selected FAQs'),
+				$this->SelectedFAQs(),
+				$components
+			)
+		);
+
 		return $fields;
 	}
 
@@ -86,6 +132,7 @@ class FAQPage_Controller extends Page_Controller {
 	public static $search_results_summary_total_pages_key = '%TotalPages%';
 	public static $search_results_summary_query_key = '%Query%';
 
+	// solr configuration
 	public static $search_index_class = 'FAQSearchIndex';
 	public static $classes_to_search = array(
 		array(
@@ -97,7 +144,7 @@ class FAQPage_Controller extends Page_Controller {
 	/*
 	 * Renders the base search page if no search term is present.
 	 * Otherwise runs a search and renders the search results page.
-	 * Search action taken from BasePage.php and modified.
+	 * Search action taken from FAQPage.php and modified.
 	 */
 	public function index() {
 		if($this->request->getVar(self::$search_term_key)) {
