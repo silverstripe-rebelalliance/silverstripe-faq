@@ -29,11 +29,11 @@ class FAQPage extends Page {
 	);
 
 	private static $many_many = array(
-		'SelectedFAQs' => 'FAQ'
+		'FeaturedFAQs' => 'FAQ'
 	);
 
 	private static $many_many_extraFields = array(
-		'SelectedFAQs' => array(
+		'FeaturedFAQs' => array(
 			'SortOrder' => 'Int'
 		)
 	);
@@ -43,10 +43,10 @@ class FAQPage extends Page {
 	private static $description = 'FAQ search page';
 
 	/**
-	 * Gets selected FAQs sorted by order. Used by template
+	 * Gets Featured FAQs sorted by order. Used by template
 	 */
-	public function SelectedFAQs() {
-		return $this->getManyManyComponents('SelectedFAQs')->sort('SortOrder');
+	public function FeaturedFAQs() {
+		return $this->getManyManyComponents('FeaturedFAQs')->sort('SortOrder');
 	}
 
 	/**
@@ -90,9 +90,9 @@ class FAQPage extends Page {
 					')
 		));
 
-		// Selected FAQs tab
-		$SelectedFAQsTab = new Tab('SelectedFAQs', _t('FAQPage.SelectedFAQs','Selected FAQs'));
-		$fields->insertBefore($SelectedFAQsTab, 'PublishingSchedule');
+		// Featured FAQs tab
+		$FeaturedFAQsTab = new Tab('FeaturedFAQs', _t('FAQPage.FeaturedFAQs','Featured FAQs'));
+		$fields->insertBefore($FeaturedFAQsTab, 'PublishingSchedule');
 		
 		$components = GridFieldConfig_RelationEditor::create();
 		$components->removeComponentsByType('GridFieldAddNewButton');
@@ -110,34 +110,34 @@ class FAQPage extends Page {
 		$components->getComponentByType('GridFieldAddExistingAutocompleter')
 				   ->setResultsFormat('$Question');
 
-		// logic regarding whether or not more SelectedFAQs can be added
-		$limitSelectedFAQs = false;
-		if($this->SinglePageLimit && $this->SelectedFAQs()->count() >= $this->SinglePageLimit) {
-			$limitSelectedFAQs = true;
+		// logic regarding whether or not more FeaturedFAQs can be added
+		$limitFeaturedFAQs = false;
+		if($this->SinglePageLimit && $this->FeaturedFAQs()->count() >= $this->SinglePageLimit) {
+			$limitFeaturedFAQs = true;
 		}
 
-		if ($limitSelectedFAQs) {
-			// prevent users from adding more SelectedFAQs
+		if ($limitFeaturedFAQs) {
+			// prevent users from adding more FeaturedFAQs
 			$components->removeComponentsByType('GridFieldAddExistingAutocompleter');
 		}
 
-		$SelectedFAQsLimitNoticeContents = sprintf(
+		$FeaturedFAQsLimitNoticeContents = sprintf(
 			'<p class="message %s">Limited by the Single Page Limit in the Settings tab (currently %s)</p>',
-			$limitSelectedFAQs ? 'bad' : '', //make limit message red if we have to prevent adding more SelectedFAQs
+			$limitFeaturedFAQs ? 'bad' : '', //make limit message red if we have to prevent adding more FeaturedFAQs
 			$this->SinglePageLimit ? $this->SinglePageLimit : 'no limit' //show 'currently no limit' if SinglePageLimit is '0'
 		);
 
 		$fields->addFieldsToTab(
-			'Root.SelectedFAQs',
+			'Root.FeaturedFAQs',
 			array(
 				LiteralField::create(
-					'SelectedFAQsLimitNotice',
-					$SelectedFAQsLimitNoticeContents
+					'FeaturedFAQsLimitNotice',
+					$FeaturedFAQsLimitNoticeContents
 				),
 				GridField::create(
-					'SelectedFAQs',
-					_t('FAQPage.SelectedFAQs','Selected FAQs'),
-					$this->SelectedFAQs(),
+					'FeaturedFAQs',
+					_t('FAQPage.FeaturedFAQs','Featured FAQs'),
+					$this->FeaturedFAQs(),
 					$components
 				)
 			)

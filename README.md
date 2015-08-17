@@ -69,7 +69,7 @@ The module comes with its own Solr search index, customized to have a fuzzy sear
 
 ### Frontend templates
 
-Can be overloaded within the project themes folder. Default templates can be found on the `faq/templates`.
+All templates can be overloaded from within your project themes directory. Module default templates can be found in the module's `templates` directory.
 
 ### Configuration using YAML
 
@@ -90,6 +90,10 @@ FAQ:
   answer_boost: '1'
   keywords_boost: '4'
 ```
+### Adding Featured FAQs
+
+Featured FAQs appear on the FAQ Page before a user performs a search. These can be added and organised from the `Featured FAQs` tab of the FAQ Page CMS admin.
+![](docs/images/faq-featuredfaqsadmin.png)
 
 ## TODO
 

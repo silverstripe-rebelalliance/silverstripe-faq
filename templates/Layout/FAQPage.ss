@@ -2,7 +2,7 @@
 $Content
 <% include FAQSearchForm %>
 <div>
-    <% loop SelectedFAQs.sort(SortOrder) %>
+    <% loop FeaturedFAQs.sort(SortOrder) %>
         <% include FAQSearchResult %>
     <% end_loop %>
 </div>
