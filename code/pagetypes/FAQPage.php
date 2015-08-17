@@ -102,15 +102,37 @@ class FAQPage extends Page {
 
 		$SelectedFAQsTab = new Tab('SelectedFAQs', _t('FAQPage.SelectedFAQs','Selected FAQs'));
 		$fields->insertBefore($SelectedFAQsTab, 'PublishingSchedule');
-		$fields->addFieldToTab(
+
+		// logic regarding whether or not more SelectedFAQs can be added
+		$limitSelectedFAQs = $this->SelectedFAQs()->count() >= $this->SinglePageLimit && $this->SinglePageLimit;
+
+		if ($limitSelectedFAQs) {
+			// prevent users from adding more SelectedFAQs
+			$components->removeComponentsByType('GridFieldAddExistingAutocompleter');
+		}
+
+		$SelectedFAQsLimitNoticeContents = sprintf(
+			'<p class="message %s">Limited by the Single Page Limit in the Settings tab (currently %s)</p>',
+			$limitSelectedFAQs ? 'bad' : '', //make limit message red if we have to prevent adding more SelectedFAQs
+			$this->SinglePageLimit ? $this->SinglePageLimit : 'no limit' //show 'currently no limit' if SinglePageLimit is '0'
+		);
+
+		$fields->addFieldsToTab(
 			'Root.SelectedFAQs',
-			GridField::create(
-				'SelectedFAQs',
-				_t('FAQPage.SelectedFAQs','Selected FAQs'),
-				$this->SelectedFAQs(),
-				$components
+			array(
+				LiteralField::create(
+					'SelectedFAQsLimitNotice',
+					$SelectedFAQsLimitNoticeContents
+				),
+				GridField::create(
+					'SelectedFAQs',
+					_t('FAQPage.SelectedFAQs','Selected FAQs'),
+					$this->SelectedFAQs(),
+					$components
+				)
 			)
 		);
+
 
 		return $fields;
 	}
