@@ -23,10 +23,6 @@ class FAQSearchIndex extends CwpSearchIndex {
 		$this->setFieldBoosting('FAQ_Answer', FAQ::config()->answer_boost);
 		$this->setFieldBoosting('FAQ_Keywords', FAQ::config()->keywords_boost);
 
-		// Copy relevant fields to spellchecker index
-		$this->addCopyField('FAQ_Question', '_spellcheckText');
-		$this->addCopyField('FAQ_Answer', '_spellcheckText');
-		$this->addCopyField('FAQ_Keywords', '_spellcheckText');
 	}
 
 	/**
