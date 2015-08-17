@@ -42,10 +42,16 @@ class FAQPage extends Page {
 
 	private static $description = 'FAQ search page';
 
+	/**
+	 * Gets selected FAQs sorted by order. Used by template
+	 */
 	public function SelectedFAQs() {
 		return $this->getManyManyComponents('SelectedFAQs')->sort('SortOrder');
 	}
 
+	/**
+	 *
+	 */
 	public function getCMSFields() {
 		$fields = parent::getCMSFields();
 		$settings = new Tab('Settings', 'Settings');
@@ -85,6 +91,9 @@ class FAQPage extends Page {
 		));
 
 		// Selected FAQs tab
+		$SelectedFAQsTab = new Tab('SelectedFAQs', _t('FAQPage.SelectedFAQs','Selected FAQs'));
+		$fields->insertBefore($SelectedFAQsTab, 'PublishingSchedule');
+		
 		$components = GridFieldConfig_RelationEditor::create();
 		$components->removeComponentsByType('GridFieldAddNewButton');
 		$components->removeComponentsByType('GridFieldEditButton');
@@ -99,13 +108,13 @@ class FAQPage extends Page {
 		));
 
 		$components->getComponentByType('GridFieldAddExistingAutocompleter')
-			->setResultsFormat('$Question');
-
-		$SelectedFAQsTab = new Tab('SelectedFAQs', _t('FAQPage.SelectedFAQs','Selected FAQs'));
-		$fields->insertBefore($SelectedFAQsTab, 'PublishingSchedule');
+				   ->setResultsFormat('$Question');
 
 		// logic regarding whether or not more SelectedFAQs can be added
-		$limitSelectedFAQs = $this->SelectedFAQs()->count() >= $this->SinglePageLimit && $this->SinglePageLimit;
+		$limitSelectedFAQs = false;
+		if($this->SinglePageLimit && $this->SelectedFAQs()->count() >= $this->SinglePageLimit) {
+			$limitSelectedFAQs = true;
+		}
 
 		if ($limitSelectedFAQs) {
 			// prevent users from adding more SelectedFAQs
@@ -134,7 +143,6 @@ class FAQPage extends Page {
 			)
 		);
 
-
 		return $fields;
 	}
 
@@ -146,7 +154,10 @@ class FAQPage extends Page {
 class FAQPage_Controller extends Page_Controller {
 	private static $allowed_actions = array('view');
 
-	// This is the string used for the url search term variable. E.g. "searchterm" in "http://mysite/faq?searchterm=this+is+a+search"
+	/**
+	 * This is the string used for the url search term variable.
+	 * E.g. "searchterm" in "http://mysite/faq?searchterm=this+is+a+search"
+	 */
 	public static $search_term_key = 'q';
 	// We replace these keys with real data in the SearchResultsSummary before adding to the template.
 	public static $search_results_summary_current_page_key = '%CurrentPage%';
@@ -188,7 +199,6 @@ class FAQPage_Controller extends Page_Controller {
 
 		return array('FAQ' => $faq);
 	}
-
 
 
 	/**
