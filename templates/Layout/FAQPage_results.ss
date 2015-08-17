@@ -12,7 +12,7 @@
 	</h1>
 
 	<% if $SearchSuggestion.Suggestion %>
-		<p>Did you mean <a href="$SearchSuggestion.SuggestionQueryString">$SearchSuggestion.SuggestionNice</a>?</p>
+		<p>Did you mean <a href="$SearchSuggestion.SuggestionQueryString">$SearchSuggestion.SuggestionNice</a><% if $SearchSuggestion.ShowQuestionmark %>?<% end_if %></p>
 	<% end_if %>
 
 	<% if $SearchResults %>

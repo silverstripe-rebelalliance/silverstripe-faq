@@ -227,10 +227,22 @@ class FAQPage_Controller extends Page_Controller {
 			$searchResult = $this->doSearch($query, $start, $limit);
 
 			$results = $searchResult->Matches;
+
+			// if the suggested query has a trailing '?' then hide the hardcoded one from 'Did you mean <Suggestion>?'
+			$showTrailingQuestionmark = !preg_match('/\?$/', $searchResult->Suggestion);
+
+			// remove the '/' from our escaped trailing questionmark
+			$suggestionReplace = preg_replace('/[\\\][\?]$/', '?', array(
+				$searchResult->Suggestion,
+				$searchResult->SuggestionNice,
+				$searchResult->SuggestionQueryString,
+			));
+
 			$suggestionData = array(
-				'Suggestion' => $searchResult->Suggestion,
-				'SuggestionNice' => $searchResult->SuggestionNice,
-				'SuggestionQueryString' => $this->makeQueryLink($searchResult->SuggestionQueryString)
+				'ShowQuestionmark' => $showTrailingQuestionmark,
+				'Suggestion' => $suggestionReplace[0],
+				'SuggestionNice' => $suggestionReplace[1],
+				'SuggestionQueryString' => $this->makeQueryLink($suggestionReplace[2])
 			);
 			$renderData = $this->parseSearchResults($results, $suggestionData, $keywords);
 		} catch(Exception $e) {
