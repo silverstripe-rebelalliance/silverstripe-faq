@@ -391,8 +391,40 @@ class FAQPage_Controller extends Page_Controller {
 	}
 
 	/**
-	 * Expose variables to the template - both statics and data objects, and make the translatable where relevant.
+	 * Deep recursion of category taxonomy terms. Builds array of categories for template.
 	 */
+	protected function getTagsForTemplate(&$categoriesAccumulator, $categoryTerms, $depth = 0) {
+		foreach ($categoryTerms as $category) {
+
+			// generate the name, along with correct spacing for this depth and bullets
+			$namePrefix = $category->Name;
+			$namePrefix = ($depth === 0) ? $namePrefix : ('&bull;&nbsp;' . $namePrefix);
+			$namePrefix = str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $depth) . $namePrefix;
+
+			$formattedCategoryArray = array(
+				'Name' => $namePrefix,
+				'ID' => $category->ID
+			);
+
+			$categoriesAccumulator->push(new ArrayData($formattedCategoryArray));
+
+			// if there are children getTagsForTemplate on them as well. Increment depth.
+			$children = $category->Children();
+			if ($children->count() !== 0) {
+				$this->getTagsForTemplate($categoriesAccumulator, $children, $depth+1);
+			}
+		}
+	}
+
+	/**
+	 * Expose variables to the template - both statics and data objects, and make them translatable where relevant.
+	 */
+	public function Categories() {
+		$baseCategories = array(FAQ::getRootCategory());
+		$categories = new ArrayList(array()); // passed by reference to getTagsForTemplate
+		$this->getTagsForTemplate($categories, $baseCategories);
+		return $categories;
+	}
 	public function SearchFieldPlaceholder() {
 		return _t('FAQPage.SearchFieldPlaceholder', $this->SearchFieldPlaceholder);
 	}
