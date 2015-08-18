@@ -27,29 +27,6 @@ class FAQSearchIndex extends CwpSearchIndex {
 
 	}
 
-	/**
-	 * Overload 
-	 */
-	public function search(SearchQuery $query, $offset = -1, $limit = -1, $params = array()) {
-		// escape query
-		$queryInternals = array_pop($query->search);
-		$queryInternals['text'] = self::escapeQuery($queryInternals['text']);
-		$query->search[] = $queryInternals;
-
-		$result = parent::search($query, $offset, $limit, $params);
-
-		// unescape suggestions
-		$unescapedSuggestions = self::unescapeQuery(array(
-			$result->Suggestion,
-			$result->SuggestionNice,
-			$result->SuggestionQueryString,
-		));
-		$result->Suggestion = $unescapedSuggestions[0];
-		$result->SuggestionNice = $unescapedSuggestions[1];
-		$result->SuggestionQueryString = $unescapedSuggestions[2];
-
-		return $result;
-	}
 
 	/**
 	 * escapes characters that may break Solr search

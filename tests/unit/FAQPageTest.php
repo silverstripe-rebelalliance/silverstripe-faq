@@ -106,18 +106,4 @@ class FAQPageTest extends FunctionalTest {
 		$this->assertTrue($response['SearchResults']->getTotalItems() === 2);
 		$this->assertFalse($response['SearchResults']->MoreThanOnePage());
 	}
-
-	/**
-	 * Test escaping queries
-	 */
-	public function testEscapeQuery() {
-		$this->assertTrue($this->controller->escapeQuery('How did : I get here?') === 'How did \: I get here\?');
-	}
-
-	/**
-	 * Test unescaping queries
-	 */
-	public function testUnescapeQuery() {
-		$this->assertTrue($this->controller->unescapeQuery('How did \: I get here\?') === 'How did : I get here?');
-	}
 }

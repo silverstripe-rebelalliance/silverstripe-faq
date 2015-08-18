@@ -224,11 +224,18 @@ class FAQPage_Controller extends Page_Controller {
 			// if the suggested query has a trailing '?' then hide the hardcoded one from 'Did you mean <Suggestion>?'
 			$showTrailingQuestionmark = !preg_match('/\?$/', $searchResult->Suggestion);
 
+			// remove the '/' from our escaped trailing questionmark
+			$suggestionReplace = FAQSearchIndex::unescapeQuery(array(
+				$searchResult->Suggestion,
+				$searchResult->SuggestionNice,
+				$searchResult->SuggestionQueryString,
+			));
+
 			$suggestionData = array(
 				'ShowQuestionmark' => $showTrailingQuestionmark,
-				'Suggestion' => $searchResult->Suggestion,
-				'SuggestionNice' => $searchResult->SuggestionNice,
-				'SuggestionQueryString' => $this->makeQueryLink($searchResult->SuggestionQueryString)
+				'Suggestion' => $suggestionReplace[0],
+				'SuggestionNice' => $suggestionReplace[1],
+				'SuggestionQueryString' => $this->makeQueryLink($suggestionReplace[2])
 			);
 			$renderData = $this->parseSearchResults($results, $suggestionData, $keywords);
 		} catch(Exception $e) {
@@ -244,10 +251,12 @@ class FAQPage_Controller extends Page_Controller {
 	 * @return SearchQuery
 	 */
 	protected function getSearchQuery($keywords) {
+		// stop Solr breaking questions
+		$searchKeywords = FAQSearchIndex::escapeQuery($keywords);
+
 		$query = new SearchQuery();
 		$query->classes = self::$classes_to_search;
-		$query->filter('FAQ_Category_ID', array_filter(array(7), 'intval'), false);
-		$query->search($keywords);
+		$query->search($searchKeywords);
 
 		// Artificially lower the amount of results to prevent too high resource usage.
 		// on subsequent canView check loop.
