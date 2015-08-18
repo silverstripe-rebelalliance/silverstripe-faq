@@ -75,7 +75,7 @@ class FAQPage extends Page {
 		$fields->addFieldsToTab('Root.Settings', array(
 			TextField::create('SinglePageLimit')
 					->setDescription('
-						If set higher than 0, limits results to that many and removes pagination
+						If set higher than 0, limits results to that many and removes pagination.
 					'),
 			TextField::create('SearchFieldPlaceholder')
 					 ->setDescription('Text to appear in the search field before the user enters their question'),
@@ -126,13 +126,36 @@ class FAQPage extends Page {
 		$components->getComponentByType('GridFieldAddExistingAutocompleter')
 				   ->setResultsFormat('$Question');
 
-		$fields->addFieldToTab(
+		// logic regarding whether or not more FeaturedFAQs can be added
+		$limitFeaturedFAQs = false;
+		if($this->SinglePageLimit && $this->FeaturedFAQs()->count() >= $this->SinglePageLimit) {
+			$limitFeaturedFAQs = true;
+		}
+
+		if ($limitFeaturedFAQs) {
+			// prevent users from adding more FeaturedFAQs
+			$components->removeComponentsByType('GridFieldAddExistingAutocompleter');
+		}
+
+		$FeaturedFAQsLimitNoticeContents = sprintf(
+			'<p class="message %s">Limited by the Single Page Limit in the Settings tab (currently %s)</p>',
+			$limitFeaturedFAQs ? 'bad' : '', //make limit message red if we have to prevent adding more FeaturedFAQs
+			$this->SinglePageLimit ? $this->SinglePageLimit : 'no limit' //show 'currently no limit' if SinglePageLimit is '0'
+		);
+
+		$fields->addFieldsToTab(
 			'Root.FeaturedFAQs',
-			GridField::create(
-				'FeaturedFAQs',
-				_t('FAQPage.FeaturedFAQs','Featured FAQs'),
-				$this->FeaturedFAQs(),
-				$components
+			array(
+				LiteralField::create(
+					'FeaturedFAQsLimitNotice',
+					$FeaturedFAQsLimitNoticeContents
+				),
+				GridField::create(
+					'FeaturedFAQs',
+					_t('FAQPage.FeaturedFAQs','Featured FAQs'),
+					$this->FeaturedFAQs(),
+					$components
+				)
 			)
 		);
 
@@ -224,18 +247,11 @@ class FAQPage_Controller extends Page_Controller {
 			// if the suggested query has a trailing '?' then hide the hardcoded one from 'Did you mean <Suggestion>?'
 			$showTrailingQuestionmark = !preg_match('/\?$/', $searchResult->Suggestion);
 
-			// remove the '/' from our escaped trailing questionmark
-			$suggestionReplace = FAQSearchIndex::unescapeQuery(array(
-				$searchResult->Suggestion,
-				$searchResult->SuggestionNice,
-				$searchResult->SuggestionQueryString,
-			));
-
 			$suggestionData = array(
 				'ShowQuestionmark' => $showTrailingQuestionmark,
-				'Suggestion' => $suggestionReplace[0],
-				'SuggestionNice' => $suggestionReplace[1],
-				'SuggestionQueryString' => $this->makeQueryLink($suggestionReplace[2])
+				'Suggestion' => $searchResult->Suggestion,
+				'SuggestionNice' => $searchResult->SuggestionNice,
+				'SuggestionQueryString' => $this->makeQueryLink($searchResult->SuggestionQueryString)
 			);
 			$renderData = $this->parseSearchResults($results, $suggestionData, $keywords);
 		} catch(Exception $e) {
@@ -251,12 +267,10 @@ class FAQPage_Controller extends Page_Controller {
 	 * @return SearchQuery
 	 */
 	protected function getSearchQuery($keywords) {
-		// stop Solr breaking questions
-		$searchKeywords = FAQSearchIndex::escapeQuery($keywords);
-
 		$query = new SearchQuery();
 		$query->classes = self::$classes_to_search;
-		$query->search($searchKeywords);
+		$query->filter('FAQ_Category_ID', array_filter(array(7), 'intval'), false);
+		$query->search($keywords);
 
 		// Artificially lower the amount of results to prevent too high resource usage.
 		// on subsequent canView check loop.
