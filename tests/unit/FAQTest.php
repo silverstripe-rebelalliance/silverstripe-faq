@@ -19,4 +19,34 @@ class FAQTest extends SapphireTest {
 		$faq1->write();
 		$this->assertNotEquals('', $faq1->getLink());
 	}
+	
+	/**
+	 * Should always get a root category
+	 * {@see FAQ::getRootCategory}
+	 */
+	public function testGetRootCategory() {
+		// get root we assume is set by config
+		$root = FAQ::getRootCategory();
+		$this->assertTrue($root->exists());
+		$this->assertEquals('TaxonomyTerm', $root->ClassName);
+		
+		// change config to something we know is not in the taxonomy table
+		Config::inst()->update('FAQ', 'taxonomy_name', 'lolipopRANDOMCategory');
+		$root = FAQ::getRootCategory();
+		$this->assertTrue($root->exists());
+		$this->assertEquals('TaxonomyTerm', $root->ClassName);
+	}
+	
+	/**
+	 * Tests that FAQ category gets changed if the root category is not set via CMS
+	 * {@see FAQ::onBeforeWrite}
+	 */
+	public function testSetCategoryOnWrite() {
+		$faq = new FAQ(array('Question' => 'question 1',
+							 'Answer' => 'Milkyway chocolate bar'));
+		$faq->write();
+		
+		$test = FAQ::get()->filter('ID', $faq->ID)->first();
+		$this->assertTrue($test->CategoryID != 0);
+	}
 }
