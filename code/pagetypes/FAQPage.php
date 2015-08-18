@@ -274,7 +274,7 @@ class FAQPage_Controller extends Page_Controller {
 		if(count($categories) > 0) {
 			$query->filter('FAQ_Category_ID', array_filter($categories, 'intval'));
 		}
-		$query->search($searchKeywords);
+		$query->search($keywords);
 
 		// Artificially lower the amount of results to prevent too high resource usage.
 		// on subsequent canView check loop.
