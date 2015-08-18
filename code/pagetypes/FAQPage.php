@@ -75,7 +75,7 @@ class FAQPage extends Page {
 		$fields->addFieldsToTab('Root.Settings', array(
 			TextField::create('SinglePageLimit')
 					->setDescription('
-						If set higher than 0, limits results to that many and removes pagination.
+						If set higher than 0, limits results to that many and removes pagination
 					'),
 			TextField::create('SearchFieldPlaceholder')
 					 ->setDescription('Text to appear in the search field before the user enters their question'),
