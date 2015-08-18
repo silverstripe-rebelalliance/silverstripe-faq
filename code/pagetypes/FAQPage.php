@@ -29,7 +29,8 @@ class FAQPage extends Page {
 	);
 
 	private static $many_many = array(
-		'FeaturedFAQs' => 'FAQ'
+		'FeaturedFAQs' => 'FAQ',
+		'Categories' => 'TaxonomyTerm'
 	);
 
 	private static $many_many_extraFields = array(
@@ -54,6 +55,21 @@ class FAQPage extends Page {
 	 */
 	public function getCMSFields() {
 		$fields = parent::getCMSFields();
+		
+		// categories
+		$treedropdown = new TreeMultiselectField(
+							'Categories',
+							'Categories to show and search for',
+							'TaxonomyTerm'
+						);
+		$treedropdown->setDescription('Displays FAQs with selected categories filtered');
+		$treedropdown->setTreeBaseID(FAQ::getRootCategory()->ID);
+		$fields->addFieldToTab(
+			'Root.Main',
+			$treedropdown,
+			'Metadata'
+		);
+		
 		$settings = new Tab('Settings', 'Settings');
 		$fields->insertBefore($settings, 'PublishingSchedule');
 		$fields->addFieldsToTab('Root.Settings', array(
@@ -263,6 +279,7 @@ class FAQPage_Controller extends Page_Controller {
 		
 		$query = new SearchQuery();
 		$query->classes = self::$classes_to_search;
+		$query->filter('FAQ_Category_ID', array_filter(array(7), 'intval'), false);
 		$query->search($searchKeywords);
 
 		// Artificially lower the amount of results to prevent too high resource usage.

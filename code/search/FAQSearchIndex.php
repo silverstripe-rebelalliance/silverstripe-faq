@@ -17,6 +17,8 @@ class FAQSearchIndex extends CwpSearchIndex {
 		$this->addFulltextField('Question');
 		$this->addFulltextField('Answer');
 		$this->addFulltextField('Keywords');
+		
+		$this->addFilterField('Category.ID');
 
 		// Add field boosting
 		$this->setFieldBoosting('FAQ_Question', FAQ::config()->question_boost);
