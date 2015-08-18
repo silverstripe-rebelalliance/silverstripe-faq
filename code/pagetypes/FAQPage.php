@@ -232,7 +232,7 @@ class FAQPage_Controller extends Page_Controller {
 			$showTrailingQuestionmark = !preg_match('/\?$/', $searchResult->Suggestion);
 
 			// remove the '/' from our escaped trailing questionmark
-			$suggestionReplace = preg_replace('/[\\\][\?]$/', '?', array(
+			$suggestionReplace = $this->unescapeQuery(array(
 				$searchResult->Suggestion,
 				$searchResult->SuggestionNice,
 				$searchResult->SuggestionQueryString,
@@ -254,13 +254,29 @@ class FAQPage_Controller extends Page_Controller {
 	}
 
 	/**
+	 * escapes characters that may break Solr search
+	 */
+	public function escapeQuery($keywords) {
+		$searchKeywords = preg_replace('/([\+\-!\(\)\{\}\[\]\^"~\*\?:\/\|&]|AND|OR|NOT)/', '\\\${1}', $keywords);
+		return $searchKeywords;
+	}
+
+	/**
+	 * unescapes characters previously escaped to stop Solr breaking
+	 */
+	public function unescapeQuery($keywords) {
+		$searchKeywords = preg_replace('/\\\([\+\-!\(\)\{\}\[\]\^"~\*\?:\/\|&]|AND|OR|NOT)/', '${1}', $keywords);
+		return $searchKeywords;
+	}
+
+	/**
 	 * Builds a search query from a give search term.
 	 * @return SearchQuery
 	 */
 	protected function getSearchQuery($keywords) {
 		// stop Solr breaking questions
-		$searchKeywords = preg_replace('/\?$/', '\?', $keywords);
-		
+		$searchKeywords = $this->escapeQuery($keywords);
+
 		$query = new SearchQuery();
 		$query->classes = self::$classes_to_search;
 		$query->search($searchKeywords);
