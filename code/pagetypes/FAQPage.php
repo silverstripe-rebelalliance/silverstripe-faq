@@ -267,10 +267,14 @@ class FAQPage_Controller extends Page_Controller {
 	 * @return SearchQuery
 	 */
 	protected function getSearchQuery($keywords) {
+		$categories = $this->Categories()->column('ID');
+		
 		$query = new SearchQuery();
 		$query->classes = self::$classes_to_search;
-		$query->filter('FAQ_Category_ID', array_filter(array(7), 'intval'), false);
-		$query->search($keywords);
+		if(count($categories) > 0) {
+			$query->filter('FAQ_Category_ID', array_filter($categories, 'intval'));
+		}
+		$query->search($searchKeywords);
 
 		// Artificially lower the amount of results to prevent too high resource usage.
 		// on subsequent canView check loop.

@@ -17,6 +17,7 @@ class FAQAdmin extends ModelAdmin {
 
 	/**
 	 * Overload ModelAdmin->getExportFields() so that we can export keywords.
+	 * @see ModelAdmin::getExportFields
 	 */
 	public function getExportFields() {
 		return array(
