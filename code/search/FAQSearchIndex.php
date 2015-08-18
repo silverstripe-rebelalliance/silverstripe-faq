@@ -28,6 +28,46 @@ class FAQSearchIndex extends CwpSearchIndex {
 	}
 
 	/**
+	 * Overload 
+	 */
+	public function search(SearchQuery $query, $offset = -1, $limit = -1, $params = array()) {
+		// escape query
+		$queryInternals = array_pop($query->search);
+		$queryInternals['text'] = self::escapeQuery($queryInternals['text']);
+		$query->search[] = $queryInternals;
+
+		$result = parent::search($query, $offset, $limit, $params);
+
+		// unescape suggestions
+		$unescapedSuggestions = self::unescapeQuery(array(
+			$result->Suggestion,
+			$result->SuggestionNice,
+			$result->SuggestionQueryString,
+		));
+		$result->Suggestion = $unescapedSuggestions[0];
+		$result->SuggestionNice = $unescapedSuggestions[1];
+		$result->SuggestionQueryString = $unescapedSuggestions[2];
+
+		return $result;
+	}
+
+	/**
+	 * escapes characters that may break Solr search
+	 */
+	public static function escapeQuery($keywords) {
+		$searchKeywords = preg_replace('/([\+\-!\(\)\{\}\[\]\^"~\*\?:\/\|&]|AND|OR|NOT)/', '\\\${1}', $keywords);
+		return $searchKeywords;
+	}
+
+	/**
+	 * unescapes characters previously escaped to stop Solr breaking
+	 */
+	public static function unescapeQuery($keywords) {
+		$searchKeywords = preg_replace('/\\\([\+\-!\(\)\{\}\[\]\^"~\*\?:\/\|&]|AND|OR|NOT)/', '${1}', $keywords);
+		return $searchKeywords;
+	}
+
+	/**
 	 * Overwrite extra paths functions to only use the path defined on the yaml file
 	 * We can create/overwrite new .txt templates for only this index
 	 * @see SolrIndex::getExtrasPath
