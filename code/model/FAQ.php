@@ -14,7 +14,8 @@ class FAQ extends DataObject {
 	
 	private static $summary_fields = array(
 		'Question' => 'Question',
-		'Answer.Summary' => 'Answer'
+		'Answer.Summary' => 'Answer',
+		'Category.Name' => 'Category'
 	);
 	
 	private static $has_one = array(
@@ -76,17 +77,7 @@ class FAQ extends DataObject {
 	public function getCMSValidator() {
 		return new RequiredFields('Question', 'Answer');
 	}
-	
-	/**
-	 * Makes sure the base category saved for the FAQ is the root category
-	 */
-	protected function onBeforeWrite() {
-		parent::onBeforeWrite();
-		
-		if($this->CategoryID == 0) {
-			$this->CategoryID = self::getRootCategory()->ID;
-		}
-	}
+
 
 	/**
 	 * Filters items based on member permissions or other criteria,

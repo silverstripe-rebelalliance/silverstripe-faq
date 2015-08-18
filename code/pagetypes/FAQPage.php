@@ -43,12 +43,6 @@ class FAQPage extends Page {
 
 	private static $description = 'FAQ search page';
 
-	/**
-	 * Gets Featured FAQs sorted by order. Used by template
-	 */
-	public function FeaturedFAQs() {
-		return $this->getManyManyComponents('FeaturedFAQs')->sort('SortOrder');
-	}
 
 	/**
 	 *
@@ -62,7 +56,8 @@ class FAQPage extends Page {
 							'Categories to show and search for',
 							'TaxonomyTerm'
 						);
-		$treedropdown->setDescription('Displays FAQs with selected categories filtered');
+		$treedropdown->setDescription('Displays FAQs with selected categories filtered. '.
+									  'Don\'t select any if you want to show all FAQs regardless of categories');
 		$treedropdown->setTreeBaseID(FAQ::getRootCategory()->ID);
 		$fields->addFieldToTab(
 			'Root.Main',
@@ -120,7 +115,8 @@ class FAQPage extends Page {
 		$dataColumns->setDisplayFields(array(
 			'Title' => _t('FAQPage.ColumnQuestion', 'Ref.'),
 			'Question' => _t('FAQPage.ColumnQuestion', 'Question'),
-			'Answer.Summary' => _t('FAQPage.ColumnPageType', 'Answer')
+			'Answer.Summary' => _t('FAQPage.ColumnPageType', 'Answer'),
+			'Category.Name' => _t('FAQPage.ColumnPageType', 'Category'),
 		));
 
 		$components->getComponentByType('GridFieldAddExistingAutocompleter')
@@ -138,7 +134,8 @@ class FAQPage extends Page {
 		}
 
 		$FeaturedFAQsLimitNoticeContents = sprintf(
-			'<p class="message %s">Limited by the Single Page Limit in the Settings tab (currently %s)</p>',
+			'<p class="message %s">Limited by the Single Page Limit in the Settings tab (currently %s)</p>
+			<p class="message">Only featured FAQs with selected categories will be displayed on the site</p>',
 			$limitFeaturedFAQs ? 'bad' : '', //make limit message red if we have to prevent adding more FeaturedFAQs
 			$this->SinglePageLimit ? $this->SinglePageLimit : 'no limit' //show 'currently no limit' if SinglePageLimit is '0'
 		);
@@ -160,6 +157,33 @@ class FAQPage extends Page {
 		);
 
 		return $fields;
+	}
+	
+
+	/**
+	 * Gets Featured FAQs sorted by order. Used by template
+	 */
+	public function FeaturedFAQs() {
+		return $this->getManyManyComponents('FeaturedFAQs')->sort('SortOrder');
+	}
+	
+	/**
+	 * Remove Featured FAQs that aren't in the categories selected to filter
+	 */
+	public function FilterFeaturedFAQs() {
+		$featured = $this->FeaturedFAQs()->toArray();
+		$categories = $this->Categories()->column('ID');
+		
+		// if there's a category selected, filter
+		if(count($categories) > 0) {
+			foreach($featured as $i => $feat) {
+				if(!in_array($feat->CategoryID, $categories)) {
+					unset($featured[$i]);
+				}
+			}
+		}
+		
+		return new ArrayList($featured);
 	}
 
 }

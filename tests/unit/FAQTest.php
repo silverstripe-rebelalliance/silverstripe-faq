@@ -36,17 +36,4 @@ class FAQTest extends SapphireTest {
 		$this->assertTrue($root->exists());
 		$this->assertEquals('TaxonomyTerm', $root->ClassName);
 	}
-	
-	/**
-	 * Tests that FAQ category gets changed if the root category is not set via CMS
-	 * {@see FAQ::onBeforeWrite}
-	 */
-	public function testSetCategoryOnWrite() {
-		$faq = new FAQ(array('Question' => 'question 1',
-							 'Answer' => 'Milkyway chocolate bar'));
-		$faq->write();
-		
-		$test = FAQ::get()->filter('ID', $faq->ID)->first();
-		$this->assertTrue($test->CategoryID != 0);
-	}
 }
