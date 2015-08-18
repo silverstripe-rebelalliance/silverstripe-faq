@@ -13,8 +13,8 @@ class FAQ extends DataObject {
 	);
 	
 	private static $summary_fields = array(
-		'Question',
-		'Answer' => 'Answer.Summary'
+		'Question' => 'Question',
+		'Answer.Summary' => 'Answer'
 	);
 	
 	private static $has_one = array(

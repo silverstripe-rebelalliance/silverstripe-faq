@@ -15,4 +15,14 @@ class FAQAdmin extends ModelAdmin {
 
 	private static $menu_title = 'FAQs';
 
+	/**
+	 * Overload ModelAdmin->getExportFields() so that we can export keywords.
+	 */
+	public function getExportFields() {
+		return array(
+			'Question' => 'Question',
+			'Answer' => 'Answer',
+			'Keywords' => 'Keywords'
+		);
+	}
 }

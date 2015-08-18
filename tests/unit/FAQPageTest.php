@@ -24,7 +24,7 @@ class FAQPageTest extends FunctionalTest {
 		$faq2->write();
 
 		$this->controller = Injector::inst()->create('FAQPage_Controller');
-    }
+	}
 
 	/**
 	 * Basic load page test
@@ -105,5 +105,19 @@ class FAQPageTest extends FunctionalTest {
 		$response = $spy->search();
 		$this->assertTrue($response['SearchResults']->getTotalItems() === 2);
 		$this->assertFalse($response['SearchResults']->MoreThanOnePage());
+	}
+
+	/**
+	 * Test escaping queries
+	 */
+	public function testEscapeQuery() {
+		$this->assertTrue($this->controller->escapeQuery('How did : I get here?') === 'How did \: I get here\?');
+	}
+
+	/**
+	 * Test unescaping queries
+	 */
+	public function testUnescapeQuery() {
+		$this->assertTrue($this->controller->unescapeQuery('How did \: I get here\?') === 'How did : I get here?');
 	}
 }
