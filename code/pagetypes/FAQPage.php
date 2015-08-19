@@ -228,7 +228,7 @@ class FAQPage_Controller extends Page_Controller {
 	 * Search action taken from FAQPage.php and modified.
 	 */
 	public function index() {
-		if($this->request->getVar(self::$search_term_key)) {
+		if($this->request->getVar(self::$search_term_key) || $this->request->getVar(self::$search_category_key)) {
 			return $this->renderSearch($this->search());
 		}
 		
