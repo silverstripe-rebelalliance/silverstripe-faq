@@ -424,7 +424,7 @@ class FAQPage_Controller extends Page_Controller {
 	/**
 	 * Deep recursion of category taxonomy terms. Builds array of categories for template.
 	 */
-	protected function getTagsForTemplate(&$categoriesAccumulator, $categoryTerms, $depth = 0) {
+	protected function getCategoriesForTemplate(&$categoriesAccumulator, $categoryTerms, $depth = 0) {
 		// id of current filter category
 		$categoryFilterID = $this->request->requestVar(self::$search_category_key);
 		foreach ($categoryTerms as $category) {
@@ -449,10 +449,10 @@ class FAQPage_Controller extends Page_Controller {
 			}
 
 
-			// if there are children getTagsForTemplate on them as well. Increment depth.
+			// if there are children getCategoriesForTemplate on them as well. Increment depth.
 			$children = $category->Children();
 			if ($children->count() !== 0) {
-				$this->getTagsForTemplate($categoriesAccumulator, $children, $depth + $depthIncrement);
+				$this->getCategoriesForTemplate($categoriesAccumulator, $children, $depth + $depthIncrement);
 			}
 		}
 	}
@@ -462,8 +462,8 @@ class FAQPage_Controller extends Page_Controller {
 	 */
 	public function SelectorCategories() {
 		$baseCategories = array(FAQ::getRootCategory());
-		$categories = new ArrayList(array()); // passed by reference to getTagsForTemplate
-		$this->getTagsForTemplate($categories, $baseCategories);
+		$categories = new ArrayList(array()); // passed by reference to getCategoriesForTemplate
+		$this->getCategoriesForTemplate($categories, $baseCategories);
 		return $categories;
 	}
 	public function SearchFieldPlaceholder() {
