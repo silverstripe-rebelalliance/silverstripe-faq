@@ -8,6 +8,7 @@ class FAQPage extends Page {
 
 	private static $db = array(
 		'SinglePageLimit' => 'Int',
+		'CategoriesSelectAllText' => 'Varchar(124)',
 		'SearchFieldPlaceholder' => 'Varchar(124)',
 		'SearchResultsSummary' => 'Varchar(255)',
 		'SearchResultsTitle' => 'Varchar(255)',
@@ -19,6 +20,7 @@ class FAQPage extends Page {
 
 	private static $defaults = array(
 		'SinglePageLimit' => 0,
+		'CategoriesSelectAllText' => 'All categories',
 		'SearchFieldPlaceholder' => 'Ask us a question',
 		'SearchResultsSummary' => 'Displaying %CurrentPage% of %TotalPages% pages for "%Query%"',
 		'SearchResultsTitle' => 'FAQ Results',
@@ -72,6 +74,10 @@ class FAQPage extends Page {
 					->setDescription('
 						If set higher than 0, limits results to that many and removes pagination.
 					'),
+			TextField::create('CategoriesSelectAllText')
+					 ->setDescription('Text to appear in on the "empty" first option in the categories selector'),
+			TextField::create('SearchFieldPlaceholder')
+					 ->setDescription('Text to appear in the search field before the user enters their question'),
 			TextField::create('SearchFieldPlaceholder')
 					 ->setDescription('Text to appear in the search field before the user enters their question'),
 			TextField::create('SearchButtonText')
@@ -296,9 +302,14 @@ class FAQPage_Controller extends Page_Controller {
 	protected function getSearchQuery($keywords) {
 		$categoryIDs = array();
 		$categoryFilterID = $this->request->requestVar(self::$search_category_key);
-		$filterCategory = $this->Categories()->filter('ID', $categoryFilterID)->first();
 
-		if ($filterCategory->exists()) {
+		$categories = $this->Categories();
+		$hasCategories = $this->Categories()->count() !== '0';
+		$categories = $hasCategories ? $categories : TaxonomyTerm::get();
+
+		$filterCategory = $categories->filter('ID', $categoryFilterID)->first();
+
+		if ($filterCategory && $filterCategory->exists()) {
 			$categoryIDs = array();
 			$categoryIDs = $this->getSelectedIDs(array($filterCategory));
 		} else {
@@ -433,10 +444,11 @@ class FAQPage_Controller extends Page_Controller {
 		$IDsAccumulator = array();
 		foreach ($categoryTerms as $category) {
 
+			$hasNoCategories = $this->Categories()->count() === '0';
 			$existsOnPage = $this->Categories()->filter('ID', $category->ID)->exists();
 
 			// if the category exists on the page, add it to the IDsAccumulator
-			if ($existsOnPage) {
+			if ($existsOnPage || $hasNoCategories) {
 				$IDsAccumulator[] = $category->ID;
 			}
 
@@ -458,11 +470,13 @@ class FAQPage_Controller extends Page_Controller {
 		$categoryFilterID = $this->request->requestVar(self::$search_category_key);
 		foreach ($categoryTerms as $category) {
 
+			$isNotBaseCategory = $category->ID !== 1;
+			$hasNoCategories = $this->Categories()->count() === '0';
 			$existsOnPage = $this->Categories()->filter('ID', $category->ID)->exists();
 			// don't increment the tree depth if the parent isn't being added to this page
-			$depthIncrement = $existsOnPage ? 1 : 0;
+			$depthIncrement = $existsOnPage || $hasNoCategories ? 1 : 0;
 
-			if ($existsOnPage) {
+			if ($isNotBaseCategory && ($existsOnPage || $hasNoCategories)) {
 				// generate the name, along with correct spacing for this depth and bullets
 				$namePrefix = $category->Name;
 				$namePrefix = ($depth === 0) ? $namePrefix : ('&bull;&nbsp;' . $namePrefix);
@@ -494,6 +508,9 @@ class FAQPage_Controller extends Page_Controller {
 		$baseCategories = array(FAQ::getRootCategory());
 		$categories = $this->getCategoriesForTemplate($baseCategories);
 		return $categories;
+	}
+	public function CategoriesSelectAllText() {
+		return _t('FAQPage.CategoriesSelectAllText', $this->CategoriesSelectAllText);
 	}
 	public function SearchFieldPlaceholder() {
 		return _t('FAQPage.SearchFieldPlaceholder', $this->SearchFieldPlaceholder);
