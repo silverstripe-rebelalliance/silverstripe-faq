@@ -4,9 +4,21 @@
  */
 class FAQPageTest extends FunctionalTest {
 	protected $_page = null;
+	protected $_page2 = null;
+	protected $faq1 = null;
+	protected $faq2 = null;
 	
+	/**
+	 *
+	 */
 	public function setUp() {
 		parent::setUp();
+		
+		// categories
+		$cat1 = new TaxonomyTerm(array('Name' => 'cat1', 'ParentID' => 0));
+		$cat1->write();
+		$cat2 = new TaxonomyTerm(array('Name' => 'cat2', 'ParentID' => 0));
+		$cat2->write();
 
 		// create faq page
 		$this->_page = new FAQPage(array(
@@ -16,12 +28,27 @@ class FAQPageTest extends FunctionalTest {
 		$this->_page->write();
 		$this->_page->publish('Stage', 'Live');
 		
-		$faq1 = new FAQ(array('Question' => 'question 1',
-							  'Answer' => 'Milkyway chocolate bar'));
-		$faq1->write();
-		$faq2 = new FAQ(array('Question' => 'No imagination question',
-							  'Answer' => '42'));
-		$faq2->write();
+		// second faq page
+		$this->_page2 = new FAQPage(array('Title' => "FAQ Page 2"));
+		$this->_page2->write();
+		$this->_page2->Categories()->add($cat1);
+		$this->_page2->publish('Stage', 'Live');
+		
+		// faqs
+		$this->faq1 = new FAQ(array('Question' => 'question 1',
+							  'Answer' => 'Milkyway chocolate bar',
+							  'CategoryID' => $cat1->ID));
+		$this->faq1->write();
+		$this->faq2 = new FAQ(array('Question' => 'No imagination question',
+							  'Answer' => '42',
+							  'CategoryID' => $cat2->ID));
+		$this->faq2->write();
+		
+		// Featured FAQs
+		$this->_page->FeaturedFAQs()->add($this->faq1);
+		$this->_page->FeaturedFAQs()->add($this->faq2);
+		$this->_page2->FeaturedFAQs()->add($this->faq1);
+		$this->_page2->FeaturedFAQs()->add($this->faq2);
 
 		$this->controller = Injector::inst()->create('FAQPage_Controller');
 	}
@@ -74,12 +101,14 @@ class FAQPageTest extends FunctionalTest {
 
 		// testing good response, get one search result
 		$spy = Phockito::spy('FAQPage_Controller');
+		Phockito::when($spy)->getSearchQuery(anything())->return(new SearchQuery());
 		Phockito::when($spy)->doSearch(anything(), anything(), anything())->return(new ArrayData($mockResponse));
 		$response = $spy->search();
 		$this->assertTrue($response['SearchSuggestion']['Suggestion'] === $mockResponse['Suggestion']);
 		
 		// testing error with solr
 		$spy1 = Phockito::spy('FAQPage_Controller');
+		Phockito::when($spy1)->getSearchQuery(anything())->return(new SearchQuery());
 		Phockito::when($spy1)->doSearch(anything(), anything(), anything())->throw(new Exception("Some error"));
 		$response = $spy1->search();
 		$this->assertTrue($response['SearchError'] === true);
@@ -101,9 +130,24 @@ class FAQPageTest extends FunctionalTest {
 
 		// testing total items are equal to set in _page, and there's no more than one page in pagination
 		$spy = Phockito::spy('FAQPage_Controller', $this->_page);
+		Phockito::when($spy)->getSearchQuery(anything())->return(new SearchQuery());
 		Phockito::when($spy)->doSearch(anything(), anything(), anything())->return(new ArrayData($mockResponse));        
 		$response = $spy->search();
 		$this->assertTrue($response['SearchResults']->getTotalItems() === 2);
 		$this->assertFalse($response['SearchResults']->MoreThanOnePage());
+	}
+	
+	/**
+	 * Featured FAQs should not display on frontend if not in the selected category
+	 * If no category selected, display everything
+	 */
+	public function testFilterFeaturedFAQs() {
+		// no category selected on FAQPage, show every featured FAQ
+		$featured = $this->_page->FilterFeaturedFAQs();
+		$this->assertTrue(count($featured) == count($this->_page->FeaturedFAQs()));
+		
+		// category selected, only display one
+		$featured2 = $this->_page2->FilterFeaturedFAQs();
+		$this->assertTrue(count($featured2) == 1);
 	}
 }
