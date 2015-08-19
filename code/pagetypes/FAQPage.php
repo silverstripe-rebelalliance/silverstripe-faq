@@ -300,7 +300,7 @@ class FAQPage_Controller extends Page_Controller {
 
 		if ($filterCategory->exists()) {
 			$categoryIDs = array();
-			$this->getSelectedIDs($categoryIDs, array($filterCategory));
+			$categoryIDs = $this->getSelectedIDs(array($filterCategory));
 		} else {
 			$categoryIDs = $this->Categories()->column('ID');
 		}
@@ -429,7 +429,8 @@ class FAQPage_Controller extends Page_Controller {
 	/**
 	 * Deep recursion of a category taxonomy term and its children. Builds array of categoriy IDs for searching.
 	 */
-	protected function getSelectedIDs(&$IDsAccumulator, $categoryTerms) {
+	public function getSelectedIDs($categoryTerms) {
+		$IDsAccumulator = array();
 		foreach ($categoryTerms as $category) {
 
 			$existsOnPage = $this->Categories()->filter('ID', $category->ID)->exists();
@@ -442,16 +443,17 @@ class FAQPage_Controller extends Page_Controller {
 			// if there are children getSelectedIDs on them as well.
 			$children = $category->Children();
 			if ($children->count() !== 0) {
-				$this->getSelectedIDs($IDsAccumulator, $children);
+				$IDsAccumulator = array_merge($IDsAccumulator, $this->getSelectedIDs($children));
 			}
-
 		}
+		return $IDsAccumulator;
 	}
 
 	/**
 	 * Deep recursion of category taxonomy terms. Builds array of categories for template.
 	 */
-	protected function getCategoriesForTemplate(&$categoriesAccumulator, $categoryTerms, $depth = 0) {
+	protected function getCategoriesForTemplate($categoryTerms, $depth = 0) {
+		$categoriesAccumulator = new ArrayList(array());
 		// id of current filter category
 		$categoryFilterID = $this->request->requestVar(self::$search_category_key);
 		foreach ($categoryTerms as $category) {
@@ -479,9 +481,10 @@ class FAQPage_Controller extends Page_Controller {
 			// if there are children getCategoriesForTemplate on them as well. Increment depth.
 			$children = $category->Children();
 			if ($children->count() !== 0) {
-				$this->getCategoriesForTemplate($categoriesAccumulator, $children, $depth + $depthIncrement);
+				$categoriesAccumulator->merge($this->getCategoriesForTemplate($children, $depth + $depthIncrement));
 			}
 		}
+		return $categoriesAccumulator;
 	}
 
 	/**
@@ -489,8 +492,7 @@ class FAQPage_Controller extends Page_Controller {
 	 */
 	public function SelectorCategories() {
 		$baseCategories = array(FAQ::getRootCategory());
-		$categories = new ArrayList(array()); // passed by reference to getCategoriesForTemplate
-		$this->getCategoriesForTemplate($categories, $baseCategories);
+		$categories = $this->getCategoriesForTemplate($baseCategories);
 		return $categories;
 	}
 	public function SearchFieldPlaceholder() {
