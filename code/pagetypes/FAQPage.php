@@ -420,22 +420,28 @@ class FAQPage_Controller extends Page_Controller {
 	protected function getTagsForTemplate(&$categoriesAccumulator, $categoryTerms, $depth = 0) {
 		foreach ($categoryTerms as $category) {
 
-			// generate the name, along with correct spacing for this depth and bullets
-			$namePrefix = $category->Name;
-			$namePrefix = ($depth === 0) ? $namePrefix : ('&bull;&nbsp;' . $namePrefix);
-			$namePrefix = str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $depth) . $namePrefix;
+			$existsOnPage = $this->Categories()->filter('ID', $category->ID)->exists();
+			$depthIncrement = $existsOnPage ? 1 : 0;
 
-			$formattedCategoryArray = array(
-				'Name' => $namePrefix,
-				'ID' => $category->ID
-			);
+			if ($existsOnPage) {
+				// generate the name, along with correct spacing for this depth and bullets
+				$namePrefix = $category->Name;
+				$namePrefix = ($depth === 0) ? $namePrefix : ('&bull;&nbsp;' . $namePrefix);
+				$namePrefix = str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $depth) . $namePrefix;
 
-			$categoriesAccumulator->push(new ArrayData($formattedCategoryArray));
+				$formattedCategoryArray = array(
+					'Name' => $namePrefix,
+					'ID' => $category->ID
+				);
+
+				$categoriesAccumulator->push(new ArrayData($formattedCategoryArray));
+			}
+
 
 			// if there are children getTagsForTemplate on them as well. Increment depth.
 			$children = $category->Children();
 			if ($children->count() !== 0) {
-				$this->getTagsForTemplate($categoriesAccumulator, $children, $depth+1);
+				$this->getTagsForTemplate($categoriesAccumulator, $children, $depth + $depthIncrement);
 			}
 		}
 	}
@@ -443,7 +449,7 @@ class FAQPage_Controller extends Page_Controller {
 	/**
 	 * Expose variables to the template - both statics and data objects, and make them translatable where relevant.
 	 */
-	public function Categories() {
+	public function SelectorCategories() {
 		$baseCategories = array(FAQ::getRootCategory());
 		$categories = new ArrayList(array()); // passed by reference to getTagsForTemplate
 		$this->getTagsForTemplate($categories, $baseCategories);
