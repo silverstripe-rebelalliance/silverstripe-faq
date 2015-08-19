@@ -122,16 +122,26 @@ class FAQPage extends Page {
 		$components->getComponentByType('GridFieldAddExistingAutocompleter')
 				   ->setResultsFormat('$Question');
 
-		$FAQsWithCategories = $this->FeaturedFAQs()->filter('CategoryID', $this->Categories()->column('ID'))->count();
-		$totalFeaturedFAQs = $this->FeaturedFAQs()->count();
-		$differentCategories = $totalFeaturedFAQs - $FAQsWithCategories;
-		$FeaturedFAQsCategoryNotice = sprintf(
-			'<p class="message %s">Only featured FAQs with selected categories will be displayed on the site.%s</p>',
-			$differentCategories ? 'bad' : '',
-			$differentCategories ?
-				'<br>You have '.$differentCategories.' FAQs with different categories than the ones you have selected '.
-				'to show on this FAQPage. These will not be displayed.' : ''
-		);
+		// warning for categories filtering on featured FAQs
+		$differentCategories = 0;
+		if($this->Categories()->count() > 0) {
+			$FAQsWithCategories = $this->FeaturedFAQs()->filter('CategoryID', $this->Categories()->column('ID'))->count();
+			$totalFeaturedFAQs = $this->FeaturedFAQs()->count();
+			$differentCategories = $totalFeaturedFAQs - $FAQsWithCategories;
+		}
+		
+		$FeaturedFAQsCategoryNotice = '<p class="message %s">Only featured FAQs with selected categories will '.
+										'be displayed on the site. If you have not selected a category, all of the '.
+										'featured FAQs will be displayed.</p>';
+		if($differentCategories) {
+			$FeaturedFAQsCategoryNotice = sprintf(
+				'<p class="message %s">You have %d FAQs with different categories than the ones you have selected '.
+				'to show on this FAQPage. These will not be displayed.</p>',
+				$differentCategories ? 'bad' : '',
+				$differentCategories
+					
+			);
+		}
 
         $fields->addFieldsToTab(
 			'Root.FeaturedFAQs',
