@@ -3,6 +3,9 @@
  * Tests basic functionality of FAQPage
  */
 class FAQPageTest extends FunctionalTest {
+
+	protected static $fixture_file = 'FAQPageTest.yml';
+
 	protected $_page = null;
 	protected $_page2 = null;
 	protected $faq1 = null;
@@ -15,10 +18,14 @@ class FAQPageTest extends FunctionalTest {
 		parent::setUp();
 		
 		// categories
-		$cat1 = new TaxonomyTerm(array('Name' => 'cat1', 'ParentID' => 0));
-		$cat1->write();
-		$cat2 = new TaxonomyTerm(array('Name' => 'cat2', 'ParentID' => 0));
-		$cat2->write();
+		$Vehicles = $this->objFromFixture('TaxonomyTerm', 'Vehicles')->getTaxonomy();
+		$Cars = $this->objFromFixture('TaxonomyTerm', 'Cars')->getTaxonomy();
+		$Fords = $this->objFromFixture('TaxonomyTerm', 'Fords')->getTaxonomy();
+
+		$Cars->Children()->add($Fords);
+		$Vehicles->Children()->add($Cars);
+
+		$Roads = $this->objFromFixture('TaxonomyTerm', 'Roads')->getTaxonomy();
 
 		// create faq page
 		$this->_page = new FAQPage(array(
@@ -31,17 +38,21 @@ class FAQPageTest extends FunctionalTest {
 		// second faq page
 		$this->_page2 = new FAQPage(array('Title' => "FAQ Page 2"));
 		$this->_page2->write();
-		$this->_page2->Categories()->add($cat1);
+		$this->_page2->Categories()->addMany(array(
+			$Vehicles,
+			$Cars,
+			$Fords
+		));
 		$this->_page2->publish('Stage', 'Live');
 		
 		// faqs
 		$this->faq1 = new FAQ(array('Question' => 'question 1',
 							  'Answer' => 'Milkyway chocolate bar',
-							  'CategoryID' => $cat1->ID));
+							  'CategoryID' => $Vehicles->ID));
 		$this->faq1->write();
 		$this->faq2 = new FAQ(array('Question' => 'No imagination question',
 							  'Answer' => '42',
-							  'CategoryID' => $cat2->ID));
+							  'CategoryID' => $Roads->ID));
 		$this->faq2->write();
 		
 		// Featured FAQs
@@ -49,6 +60,8 @@ class FAQPageTest extends FunctionalTest {
 		$this->_page->FeaturedFAQs()->add($this->faq2);
 		$this->_page2->FeaturedFAQs()->add($this->faq1);
 		$this->_page2->FeaturedFAQs()->add($this->faq2);
+
+		$this->_page2_controller = new FAQPage_Controller($this->_page2);
 
 		$this->controller = Injector::inst()->create('FAQPage_Controller');
 	}
@@ -149,5 +162,12 @@ class FAQPageTest extends FunctionalTest {
 		// category selected, only display one
 		$featured2 = $this->_page2->FilterFeaturedFAQs();
 		$this->assertTrue(count($featured2) == 1);
+	}
+
+	public function testgetSelectedIDs() {
+		$CategoryID = $this->objFromFixture('TaxonomyTerm', 'Vehicles')->getTaxonomy()->ID;
+		$filterCategory = $this->_page2_controller->Categories()->filter('ID', $CategoryID)->first();
+		$selectedChildIDS = $this->_page2_controller->getSelectedIDs($filterCategory);
+		$this->assertTrue($selectedChildIDS == array(1, 2, 4));
 	}
 }
