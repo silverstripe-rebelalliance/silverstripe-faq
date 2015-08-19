@@ -122,37 +122,13 @@ class FAQPage extends Page {
 		$components->getComponentByType('GridFieldAddExistingAutocompleter')
 				   ->setResultsFormat('$Question');
 
-		// logic regarding whether or not more FeaturedFAQs can be added
-		$limitFeaturedFAQs = false;
-		if($this->SinglePageLimit && $this->FeaturedFAQs()->count() >= $this->SinglePageLimit) {
-			$limitFeaturedFAQs = true;
-		}
-
-		if ($limitFeaturedFAQs) {
-			// prevent users from adding more FeaturedFAQs
-			$components->removeComponentsByType('GridFieldAddExistingAutocompleter');
-		}
-
-		$FeaturedFAQsLimitNoticeContents = sprintf(
-			'<p class="message %s">Limited by the Single Page Limit in the Settings tab (currently %s)</p>
-			<p class="message">Only featured FAQs with selected categories will be displayed on the site</p>',
-			$limitFeaturedFAQs ? 'bad' : '', //make limit message red if we have to prevent adding more FeaturedFAQs
-			$this->SinglePageLimit ? $this->SinglePageLimit : 'no limit' //show 'currently no limit' if SinglePageLimit is '0'
-		);
-
-		$fields->addFieldsToTab(
+        $fields->addFieldToTab(
 			'Root.FeaturedFAQs',
-			array(
-				LiteralField::create(
-					'FeaturedFAQsLimitNotice',
-					$FeaturedFAQsLimitNoticeContents
-				),
-				GridField::create(
-					'FeaturedFAQs',
-					_t('FAQPage.FeaturedFAQs','Featured FAQs'),
-					$this->FeaturedFAQs(),
-					$components
-				)
+			GridField::create(
+				'FeaturedFAQs',
+				_t('FAQPage.FeaturedFAQs','Featured FAQs'),
+				$this->FeaturedFAQs(),
+				$components
 			)
 		);
 
