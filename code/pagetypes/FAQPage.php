@@ -300,7 +300,7 @@ class FAQPage_Controller extends Page_Controller {
 
 		if ($filterCategory->exists()) {
 			$categoryIDs = array();
-			$this->getSelectedChildIDs($categoryIDs, array($filterCategory));
+			$this->getSelectedIDs($categoryIDs, array($filterCategory));
 		} else {
 			$categoryIDs = $this->Categories()->column('ID');
 		}
@@ -429,7 +429,7 @@ class FAQPage_Controller extends Page_Controller {
 	/**
 	 * Deep recursion of a category taxonomy term and its children. Builds array of categoriy IDs for searching.
 	 */
-	protected function getSelectedChildIDs(&$IDsAccumulator, $categoryTerms) {
+	protected function getSelectedIDs(&$IDsAccumulator, $categoryTerms) {
 		foreach ($categoryTerms as $category) {
 
 			$existsOnPage = $this->Categories()->filter('ID', $category->ID)->exists();
@@ -439,10 +439,10 @@ class FAQPage_Controller extends Page_Controller {
 				$IDsAccumulator[] = $category->ID;
 			}
 
-			// if there are children getSelectedChildIDs on them as well.
+			// if there are children getSelectedIDs on them as well.
 			$children = $category->Children();
 			if ($children->count() !== 0) {
-				$this->getSelectedChildIDs($IDsAccumulator, $children);
+				$this->getSelectedIDs($IDsAccumulator, $children);
 			}
 
 		}
