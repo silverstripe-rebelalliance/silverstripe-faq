@@ -175,6 +175,7 @@ class FAQPage_Controller extends Page_Controller {
 	 * E.g. "searchterm" in "http://mysite/faq?searchterm=this+is+a+search"
 	 */
 	public static $search_term_key = 'q';
+	public static $search_category_key = 'c';
 	// We replace these keys with real data in the SearchResultsSummary before adding to the template.
 	public static $search_results_summary_current_page_key = '%CurrentPage%';
 	public static $search_results_summary_total_pages_key = '%TotalPages%';
@@ -267,12 +268,21 @@ class FAQPage_Controller extends Page_Controller {
 	 * @return SearchQuery
 	 */
 	protected function getSearchQuery($keywords) {
-		$categories = $this->Categories()->column('ID');
-		
+		$categoryIDs = array();
+		$categoryFilterID = $this->request->requestVar(self::$search_category_key);
+		$filterCategory = $this->Categories()->filter('ID', $categoryFilterID)->first();
+
+		if ($filterCategory->exists()) {
+			$categoryIDs = array();
+			$this->getSelectedChildIDs($categoryIDs, array($filterCategory));
+		} else {
+			$categoryIDs = $this->Categories()->column('ID');
+		}
+
 		$query = new SearchQuery();
 		$query->classes = self::$classes_to_search;
-		if(count($categories) > 0) {
-			$query->filter('FAQ_Category_ID', array_filter($categories, 'intval'));
+		if(count($categoryIDs) > 0) {
+			$query->filter('FAQ_Category_ID', array_filter($categoryIDs, 'intval'));
 		}
 		$query->search($keywords);
 
@@ -391,12 +401,35 @@ class FAQPage_Controller extends Page_Controller {
 	}
 
 	/**
+	 * Deep recursion of a category taxonomy term and its children. Builds array of categoriy IDs for searching.
+	 */
+	protected function getSelectedChildIDs(&$IDsAccumulator, $categoryTerms) {
+		foreach ($categoryTerms as $category) {
+
+			$existsOnPage = $this->Categories()->filter('ID', $category->ID)->exists();
+
+			// if the category exists on the page, add it to the IDsAccumulator
+			if ($existsOnPage) {
+				$IDsAccumulator[] = $category->ID;
+			}
+
+			// if there are children getSelectedChildIDs on them as well.
+			$children = $category->Children();
+			if ($children->count() !== 0) {
+				$this->getSelectedChildIDs($IDsAccumulator, $children);
+			}
+
+		}
+	}
+
+	/**
 	 * Deep recursion of category taxonomy terms. Builds array of categories for template.
 	 */
 	protected function getTagsForTemplate(&$categoriesAccumulator, $categoryTerms, $depth = 0) {
 		foreach ($categoryTerms as $category) {
 
 			$existsOnPage = $this->Categories()->filter('ID', $category->ID)->exists();
+			// don't increment the tree depth if the parent isn't being added to this page
 			$depthIncrement = $existsOnPage ? 1 : 0;
 
 			if ($existsOnPage) {
@@ -442,6 +475,9 @@ class FAQPage_Controller extends Page_Controller {
 	}
 	public function SearchTermKey() {
 		return self::$search_term_key;
+	}
+	public function SearchCategoryKey() {
+		return self::$search_category_key;
 	}
 	public function SearchResultsTitle() {
 		return _t('FAQPage.SearchResultsTitle', $this->SearchResultsTitle);
