@@ -122,13 +122,30 @@ class FAQPage extends Page {
 		$components->getComponentByType('GridFieldAddExistingAutocompleter')
 				   ->setResultsFormat('$Question');
 
-        $fields->addFieldToTab(
+		$FAQsWithCategories = $this->FeaturedFAQs()->filter('CategoryID', $this->Categories()->column('ID'))->count();
+		$totalFeaturedFAQs = $this->FeaturedFAQs()->count();
+		$differentCategories = $totalFeaturedFAQs - $FAQsWithCategories;
+		$FeaturedFAQsCategoryNotice = sprintf(
+			'<p class="message %s">Only featured FAQs with selected categories will be displayed on the site.%s</p>',
+			$differentCategories ? 'bad' : '',
+			$differentCategories ?
+				'<br>You have '.$differentCategories.' FAQs with different categories than the ones you have selected '.
+				'to show on this FAQPage. These will not be displayed.' : ''
+		);
+
+        $fields->addFieldsToTab(
 			'Root.FeaturedFAQs',
-			GridField::create(
-				'FeaturedFAQs',
-				_t('FAQPage.FeaturedFAQs','Featured FAQs'),
-				$this->FeaturedFAQs(),
-				$components
+			array(
+				LiteralField::create(
+					'FeaturedFAQsCategoryNotice',
+					$FeaturedFAQsCategoryNotice
+				),
+				GridField::create(
+					'FeaturedFAQs',
+					_t('FAQPage.FeaturedFAQs','Featured FAQs'),
+					$this->FeaturedFAQs(),
+					$components
+				)
 			)
 		);
 
