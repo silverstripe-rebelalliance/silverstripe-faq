@@ -134,7 +134,6 @@ class FAQPage extends Page {
 
 		return $fields;
 	}
-	
 
 	/**
 	 * Gets Featured FAQs sorted by order. Used by template
@@ -142,7 +141,7 @@ class FAQPage extends Page {
 	public function FeaturedFAQs() {
 		return $this->getManyManyComponents('FeaturedFAQs')->sort('SortOrder');
 	}
-	
+
 	/**
 	 * Remove Featured FAQs that aren't in the categories selected to filter
 	 */
@@ -426,6 +425,8 @@ class FAQPage_Controller extends Page_Controller {
 	 * Deep recursion of category taxonomy terms. Builds array of categories for template.
 	 */
 	protected function getTagsForTemplate(&$categoriesAccumulator, $categoryTerms, $depth = 0) {
+		// id of current filter category
+		$categoryFilterID = $this->request->requestVar(self::$search_category_key);
 		foreach ($categoryTerms as $category) {
 
 			$existsOnPage = $this->Categories()->filter('ID', $category->ID)->exists();
@@ -440,7 +441,8 @@ class FAQPage_Controller extends Page_Controller {
 
 				$formattedCategoryArray = array(
 					'Name' => $namePrefix,
-					'ID' => $category->ID
+					'ID' => $category->ID,
+					'Selected' => (String)$categoryFilterID === (String)$category->ID
 				);
 
 				$categoriesAccumulator->push(new ArrayData($formattedCategoryArray));
