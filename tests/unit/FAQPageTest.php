@@ -164,7 +164,10 @@ class FAQPageTest extends FunctionalTest {
 		$this->assertTrue(count($featured2) == 1);
 	}
 
-	public function testgetSelectedIDs() {
+	/**
+	 * getSelectedIDs should pull all of the ids of the passed category, and any descendants added to the page.
+	 */
+	public function testGetSelectedIDs() {
 		$CategoryID = $this->objFromFixture('TaxonomyTerm', 'Vehicles')->getTaxonomy()->ID;
 		$filterCategory = $this->_page2_controller->Categories()->filter('ID', $CategoryID)->first();
 		$selectedChildIDS = $this->_page2_controller->getSelectedIDs($filterCategory);
