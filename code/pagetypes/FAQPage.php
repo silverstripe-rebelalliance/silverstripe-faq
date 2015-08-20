@@ -471,7 +471,7 @@ class FAQPage_Controller extends Page_Controller {
 		$categoryFilterID = $this->request->requestVar(self::$search_category_key);
 		
 		foreach ($categoryTerms as $category) {
-			$isNotBaseCategory = $category->ID !== 1;
+			$isNotBaseCategory = $category->ID !== FAQ::getRootCategory()->ID;
 			$hasNoCategories = $this->Categories()->count() === '0';
 			$existsOnPage = $this->Categories()->filter('ID', $category->ID)->exists();
 			// don't increment the tree depth if the parent isn't being added to this page
