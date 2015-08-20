@@ -304,13 +304,14 @@ class FAQPage_Controller extends Page_Controller {
 		$categoryFilterID = $this->request->requestVar(self::$search_category_key);
 
 		$categories = $this->Categories();
-		$hasCategories = $this->Categories()->count() !== '0';
-		$categories = $hasCategories ? $categories : TaxonomyTerm::get();
+		if($categories->count() == 0) {
+			$categories = FAQ::getRootCategory()->Children();
+		}
 
 		$filterCategory = $categories->filter('ID', $categoryFilterID)->first();
 
+		$categoryIDs = array();
 		if ($filterCategory && $filterCategory->exists()) {
-			$categoryIDs = array();
 			$categoryIDs = $this->getSelectedIDs(array($filterCategory));
 		} else {
 			$categoryIDs = $this->Categories()->column('ID');
@@ -468,8 +469,8 @@ class FAQPage_Controller extends Page_Controller {
 		$categoriesAccumulator = new ArrayList(array());
 		// id of current filter category
 		$categoryFilterID = $this->request->requestVar(self::$search_category_key);
+		
 		foreach ($categoryTerms as $category) {
-
 			$isNotBaseCategory = $category->ID !== 1;
 			$hasNoCategories = $this->Categories()->count() === '0';
 			$existsOnPage = $this->Categories()->filter('ID', $category->ID)->exists();
@@ -509,6 +510,8 @@ class FAQPage_Controller extends Page_Controller {
 		$categories = $this->getCategoriesForTemplate($baseCategories);
 		return $categories;
 	}
+	
+	/* Translators */
 	public function CategoriesSelectAllText() {
 		return _t('FAQPage.CategoriesSelectAllText', $this->CategoriesSelectAllText);
 	}
@@ -521,16 +524,16 @@ class FAQPage_Controller extends Page_Controller {
 	public function NoResultsMessage() {
 		return _t('FAQPage.NoResultsMessage', $this->NoResultsMessage);
 	}
-	public function SearchTermKey() {
-		return self::$search_term_key;
-	}
-	public function SearchCategoryKey() {
-		return self::$search_category_key;
-	}
 	public function SearchResultsTitle() {
 		return _t('FAQPage.SearchResultsTitle', $this->SearchResultsTitle);
 	}
 	public function SearchResultMoreLink() {
 		return _t('FAQPage.SearchResultMoreLink', $this->MoreLinkText);
+	}
+	public function SearchTermKey() {
+		return self::$search_term_key;
+	}
+	public function SearchCategoryKey() {
+		return self::$search_category_key;
 	}
 }
