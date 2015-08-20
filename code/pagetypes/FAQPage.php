@@ -503,12 +503,18 @@ class FAQPage_Controller extends Page_Controller {
 	}
 
 	/**
-	 * Expose variables to the template - both statics and data objects, and make them translatable where relevant.
+	 * Expose variables to the template.
 	 */
 	public function SelectorCategories() {
 		$baseCategories = array(FAQ::getRootCategory());
 		$categories = $this->getCategoriesForTemplate($baseCategories);
 		return $categories;
+	}
+	public function SearchTermKey() {
+		return self::$search_term_key;
+	}
+	public function SearchCategoryKey() {
+		return self::$search_category_key;
 	}
 	
 	/* Translators */
@@ -529,11 +535,5 @@ class FAQPage_Controller extends Page_Controller {
 	}
 	public function SearchResultMoreLink() {
 		return _t('FAQPage.SearchResultMoreLink', $this->MoreLinkText);
-	}
-	public function SearchTermKey() {
-		return self::$search_term_key;
-	}
-	public function SearchCategoryKey() {
-		return self::$search_category_key;
 	}
 }
