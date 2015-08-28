@@ -46,24 +46,26 @@ columns and tables for the module to function.
 ## What does it do
 
 Just by adding the module to one project, you'll get a ModelAdmin for FAQs, where you can manage Questions & Answers.
-You only need to add an FAQPage type (comes with the module), and some questions and answers.
+You only need to add an FAQPage type (comes with the module), and some questions and answers. Oh, an remember
+to do `Solr_Configure` and `Solr_ReIndex`.
 
 The module comes with its own Solr search index, customized to have a fuzzy search, and has its own file for stopwords and synonyms.
+
 
 ## Quickstart
 
 1. Add a FAQPage to your CMS
 
-![](docs/images/faq-pagetype.png)
+    ![](docs/images/faq-pagetype.png)
 
 2. Add an FAQ on the FAQ ModelAdmin sidebar link
 
-![](docs/images/faq-modeladmin.png)
+    ![](docs/images/faq-modeladmin.png)
 
 3. Wait for Solr to reindex
 4. Search your FAQ page :)
 
-![](docs/images/faq-frontend.png)
+    ![](docs/images/faq-frontend.png)
 
 ## Configuration
 
@@ -93,7 +95,19 @@ FAQ:
 ### Adding Featured FAQs
 
 Featured FAQs appear on the FAQ Page before a user performs a search. These can be added and organised from the `Featured FAQs` tab of the FAQ Page CMS admin.
+
 ![](docs/images/faq-featuredfaqsadmin.png)
+
+### Categorizing
+
+The FAQ module gives the option to categorize each FAQ and filter the results fetched on search. You only need to
+create some Taxonomies for the categories and assign categories to the FAQs. Then filter them in the FAQPage.
+
+![](docs/images/faq-categories-faqpage.png)
+
+This way the FAQPage will show a dropdown on the frontend to filter by categories.
+If the FAQPage doesn't have any category selected, it will display all FAQs.
+
 
 ## TODO
 
