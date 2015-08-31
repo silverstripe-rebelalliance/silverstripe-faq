@@ -208,6 +208,8 @@ class FAQPage_Controller extends Page_Controller {
 	 */
 	public static $search_term_key = 'q';
 	public static $search_category_key = 'c';
+	public static $rating_post_key = 'rating';
+	public static $rating_session_key = 'FAQ-module__has-rated';
 	// We replace these keys with real data in the SearchResultsSummary before adding to the template.
 	public static $search_results_summary_current_page_key = '%CurrentPage%';
 	public static $search_results_summary_total_pages_key = '%TotalPages%';
@@ -240,13 +242,32 @@ class FAQPage_Controller extends Page_Controller {
 	 * @return FAQ|404 error if faq not found
 	 */
 	public function view() {
+		$ShowRatingSuccessMessage = false;
+		$FAQHasSubmittedRating = Session::get($this->getCurrentFAQRatingSessionKey());
+
 		$faq = FAQ::get()->filter('ID', $this->request->param('ID'))->first();
-		
+		$rating = (Int)$this->request->postVar(self::$rating_post_key);
+		if (!$FAQHasSubmittedRating && $rating && $rating > 0 && $rating < 6) {
+			$field = "Rating{$rating}";
+			if ($faq->$field !== null) {
+				$ShowRatingSuccessMessage = true; // only show message right after submission
+				$FAQHasSubmittedRating = true;
+				Session::set($this->getCurrentFAQRatingSessionKey(), true);
+				$faq->$field++;
+				$faq->write();
+			}
+		}
+
 		if ($faq === null) {
 			$this->httpError(404);
 		}
 
-		return array('FAQ' => $faq);
+		return array(
+			'FAQ' => $faq,
+			'SearchRatingPostKey' => self::$rating_post_key,
+			'FAQHasSubmittedRating' => $FAQHasSubmittedRating,
+			'ShowRatingSuccessMessage' => $ShowRatingSuccessMessage
+		);
 	}
 
 
@@ -500,6 +521,13 @@ class FAQPage_Controller extends Page_Controller {
 			}
 		}
 		return $categoriesAccumulator;
+	}
+
+	/**
+	 * Gets the session "has rated" key for this FAQ
+	 */
+	protected function getCurrentFAQRatingSessionKey() {
+		return self::$rating_session_key . '_' . $this->request->param('ID');
 	}
 
 	/**

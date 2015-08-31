@@ -9,9 +9,16 @@ class FAQ extends DataObject {
 	private static $db = array(
 		'Question' => 'Varchar(255)',
 		'Answer' => 'HTMLText',
-		'Keywords' => 'Text'
+		'Keywords' => 'Text',
+
+		'RatingsLastReset' => 'Date',
+		'Rating1' => 'Int',
+		'Rating2' => 'Int',
+		'Rating3' => 'Int',
+		'Rating4' => 'Int',
+		'Rating5' => 'Int'
 	);
-	
+
 	private static $summary_fields = array(
 		'Question' => 'Question',
 		'Answer.Summary' => 'Answer',
@@ -45,7 +52,15 @@ class FAQ extends DataObject {
 	 * @config
 	 */
 	private static $taxonomy_name = 'FAQ Categories';
-	
+
+	/**
+	 *
+	 */
+	public function populateDefaults() {
+		$this->RatingsLastReset = date('Y-m-d');
+		parent::populateDefaults();
+	}
+
 	/**
 	 *
 	 */
@@ -68,6 +83,36 @@ class FAQ extends DataObject {
 					. 'FAQ Category</a>',
 					$categoryField->ID));
 		$fields->addFieldToTab('Root.Main', $categoryField);
+
+		$fields->removeByName('RatingsLastReset');
+		$fields->removeByName('Rating1');
+		$fields->removeByName('Rating2');
+		$fields->removeByName('Rating3');
+		$fields->removeByName('Rating4');
+		$fields->removeByName('Rating5');
+
+		$ratingsToggleField = ToggleCompositeField::create('Ratings', _t('SiteTree.FAQRatingsToggle', 'Ratings'),
+			array(
+				new LiteralField('RatingsDisplay', "
+					<div class='ui-tabs-panel'>
+					Ratings for this FAQ since {$this->RatingsLastReset}
+						<p>
+							<ul>
+								<li><strong>1 star:</strong> <em>{$this->Rating1}</em></li>
+								<li><strong>2 star:</strong> <em>{$this->Rating2}</em></li>
+								<li><strong>3 star:</strong> <em>{$this->Rating3}</em></li>
+								<li><strong>4 star:</strong> <em>{$this->Rating4}</em></li>
+								<li><strong>5 star:</strong> <em>{$this->Rating5}</em></li>
+							</ul>
+						</p>
+						
+					</div>
+				")
+			)
+		);
+
+		$fields->addFieldToTab('Root.Main', $ratingsToggleField);
+
 		return $fields;
 	}
 	
@@ -77,7 +122,6 @@ class FAQ extends DataObject {
 	public function getCMSValidator() {
 		return new RequiredFields('Question', 'Answer');
 	}
-
 
 	/**
 	 * Filters items based on member permissions or other criteria,
