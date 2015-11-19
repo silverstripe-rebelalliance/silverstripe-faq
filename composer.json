@@ -23,9 +23,9 @@
         }
     ],
     "require": {
-		"cwp/cwp": "1.1.0",
+		"cwp/cwp": "~1.1",
 		"cwp/cwp-core": "dev-master#3e26cd3fba5ee0588121351e71513c50260fa751",
-        "silverstripe/fulltextsearch": "dev-master#ea8de7da157d9aafbe9a9ee510a6268d526b5fdc",
+		"silverstripe/fulltextsearch": "dev-master#ea8de7da157d9aafbe9a9ee510a6268d526b5fdc",
 		"silverstripe/taxonomy": "1.0.4"
         
     },
