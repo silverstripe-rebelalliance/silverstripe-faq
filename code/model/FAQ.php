@@ -66,7 +66,7 @@ class FAQ extends DataObject {
 		$categoryField->setDescription(sprintf(
 					'Select one <a href="admin/taxonomy/TaxonomyTerm/EditForm/field/TaxonomyTerm/item/%d/#Root_Children">'
 					. 'FAQ Category</a>',
-					$categoryField->ID));
+					$taxonomyRoot->ID));
 		$fields->addFieldToTab('Root.Main', $categoryField);
 		return $fields;
 	}
