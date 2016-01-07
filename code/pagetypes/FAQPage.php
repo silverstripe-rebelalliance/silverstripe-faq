@@ -64,10 +64,10 @@ class FAQPage extends Page {
 		$fields->addFieldToTab(
 			'Root.Main',
 			$treedropdown,
-			'Metadata'
+			'Content'
 		);
 		
-		$settings = new Tab('Settings', 'Settings');
+		$settings = new Tab('Settings', 'FAQ Settings');
 		$fields->insertBefore($settings, 'PublishingSchedule');
 		$fields->addFieldsToTab('Root.Settings', array(
 			TextField::create('SinglePageLimit')
