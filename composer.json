@@ -23,10 +23,10 @@
         }
     ],
     "require": {
-		"cwp/cwp": "~1.1",
-		"cwp/cwp-core": "dev-master#3e26cd3fba5ee0588121351e71513c50260fa751",
-		"silverstripe/fulltextsearch": "2.1.0",
-		"silverstripe/taxonomy": "~1.0"
+		"cwp/cwp": "^1.1.1",
+		"cwp/cwp-core": "^1.1.2",
+		"silverstripe/fulltextsearch": "^2.1.0",
+		"silverstripe/taxonomy": "^1.0"
     },
     "require-dev": {
         "silverstripe/fulltextsearch-localsolr": "dev-master"
