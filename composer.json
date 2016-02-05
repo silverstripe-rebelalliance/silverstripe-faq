@@ -23,8 +23,7 @@
         }
     ],
     "require": {
-		"cwp/cwp": "^1.1.1",
-		"cwp/cwp-core": "^1.1.2",
+		"undefinedoffset/sortablegridfield": "*",
 		"silverstripe/fulltextsearch": "^2.1.0",
 		"silverstripe/taxonomy": "^1.0"
     },

@@ -4,7 +4,7 @@
  * and adds customization capabilities to change solr configuration (.solr folder) only for this index.
  * Uses a loose search.
  */
-class FAQSearchIndex extends CwpSearchIndex {
+class FAQSearchIndex extends SolrIndex {
 	
 	/**
 	 * Adds FAQ fields to the index

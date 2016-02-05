@@ -8,16 +8,18 @@
 
 ## Introduction
 
-This module provides FAQ functionality on top of Solr for CWP 1.1.*.
+This module provides FAQ functionality on top of Solr.
 
 ## Requirements
 
- * CWP 1.1.0
- * CWP-core branch master, commit 3e26cd3fba5ee0588121351e71513c50260fa751
- * Fulltextsearch module, branch master, commit 1683f776bd45fc69299a6268aeba3e8542d8a992
+ * Fulltextsearch module, v2.1.0 or up.
+ 
+### Using CWP
 
-When the versions for cwp-core and silverstripe-fulltextsearch get tagged, the requirements for this module will change
-to that stable versions.
+If your using the module with CWP, extra requirements should be noticed (even if not required on composer for this project)
+
+ * CWP 1.1.1
+ * CWP-core 1.1.2
 
 ## Installation
 
@@ -37,6 +39,42 @@ To begin the installation first download the module online. Download the module 
 
 After you have finished downloading the file, extract the downloaded file to your site's root
 folder and ensure the name of the module is `faq`.
+
+### Configuring Solr
+The module assumes you already have Solr installed and configured. If using CWP, then it will be configured for you.
+We assume that if you are using this module, you already have Solr configured an running, but if you need help getting started with configuration,
+here is some starting code for configuring Solr
+
+````
+/**
+ * Configure Solr.
+ */
+if(!class_exists('Solr')) return;
+
+// get options from configuration
+$options = Config::inst()->get('CwpSolr', 'options');
+$solrOptions = array(
+			'host' => defined('SOLR_SERVER') ? SOLR_SERVER : 'localhost',
+			'port' => defined('SOLR_PORT') ? SOLR_PORT : 8983,
+			'path' => defined('SOLR_PATH') ? SOLR_PATH : '/solr/',
+			'version' => 4,
+
+			'indexstore' => array(
+				'mode' => defined('SOLR_MODE') ? SOLR_MODE : 'file',
+				'auth' => defined('SOLR_AUTH') ? SOLR_AUTH : NULL,
+
+				// Allow storing the solr index and config data in an arbitrary location,
+				// e.g. outside of the webroot
+				'path' => defined('SOLR_INDEXSTORE_PATH') ? SOLR_INDEXSTORE_PATH : BASE_PATH . '/.solr',
+				'remotepath' => defined('SOLR_REMOTE_PATH') ? SOLR_REMOTE_PATH : null
+			)
+		);
+
+Solr::configure_server($solrOptions);
+````
+
+
+This code would go on `mysite/_config.php`.
 
 ### All
 

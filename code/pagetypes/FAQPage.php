@@ -201,6 +201,13 @@ class FAQPage extends Page {
  */
 class FAQPage_Controller extends Page_Controller {
 	private static $allowed_actions = array('view');
+	
+	
+	/**
+	 * How many search results should be shown per-page?
+	 * @var int
+	 */
+	public static $results_per_page = 10;
 
 	/**
 	 * This is the string used for the url search term variable.
@@ -368,7 +375,7 @@ class FAQPage_Controller extends Page_Controller {
 		$rssUrl = Controller::join_links($searchURL, '?format=rss');
 		RSSFeed::linkToFeed($rssUrl, 'Search results for "' . $keywords . '"');
 		$atomUrl = Controller::join_links($searchURL, '?format=atom');
-		CwpAtomFeed::linkToFeed($atomUrl, 'Search results for "' . $keywords . '"');
+		//CwpAtomFeed::linkToFeed($atomUrl, 'Search results for "' . $keywords . '"');
 
 		/**
 		 * generate the search summary using string replacement
