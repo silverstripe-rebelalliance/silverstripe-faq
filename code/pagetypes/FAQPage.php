@@ -263,7 +263,7 @@ class FAQPage_Controller extends Page_Controller {
 	 */
 	public function search() {
 		// limit if required by cms config
-		$limit = self::$results_per_page;
+		$limit = $this->config()->results_per_page;
 		if($this->SinglePageLimit != '0') {
 			$setlimit = intval($this->SinglePageLimit);
 			If($setlimit != 0 && is_int($setlimit)) {
@@ -374,8 +374,6 @@ class FAQPage_Controller extends Page_Controller {
 		$searchURL = Director::absoluteURL($this->makeQueryLink(urlencode($keywords)));
 		$rssUrl = Controller::join_links($searchURL, '?format=rss');
 		RSSFeed::linkToFeed($rssUrl, 'Search results for "' . $keywords . '"');
-		$atomUrl = Controller::join_links($searchURL, '?format=atom');
-		//CwpAtomFeed::linkToFeed($atomUrl, 'Search results for "' . $keywords . '"');
 
 		/**
 		 * generate the search summary using string replacement
@@ -402,8 +400,7 @@ class FAQPage_Controller extends Page_Controller {
 			'SearchSuggestion' => $suggestion,
 			'Query' => DBField::create_field('Text', $keywords),
 			'SearchLink' => DBField::create_field('Text', $searchURL),
-			'RSSLink' => DBField::create_field('Text', $rssUrl),
-			'AtomLink' => DBField::create_field('Text', $atomUrl)
+			'RSSLink' => DBField::create_field('Text', $rssUrl)
 		);
 		
 		// remove pagination if required by cms config

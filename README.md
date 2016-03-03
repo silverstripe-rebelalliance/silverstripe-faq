@@ -1,29 +1,19 @@
 # FAQ
 
-## Maintainers
-
- * Wilfred Godfrey (wjagodfrey)
- * Denise Rivera (d-rivera-c)
- * Ben Manu (benmanu)
-
 ## Introduction
 
 This module provides FAQ functionality on top of Solr.
 
+Just by adding the module to the project, you'll get a ModelAdmin for FAQs, where you can manage Questions & Answers.
+You only need to add an FAQPage type (comes with the module), and some questions and answers. Remember to do `Solr_Configure` and `Solr_ReIndex`.
+
+The module comes with its own Solr search index, customized to have a fuzzy search, and has its own file for stopwords and synonyms.
+
 ## Requirements
 
- * Fulltextsearch module, v2.1.0 or up.
- 
-### Using CWP
-
-If your using the module with CWP, extra requirements should be noticed (even if not required on composer for this project)
-
- * CWP 1.1.1
- * CWP-core 1.1.2
+ * [Fulltextsearch module](https://github.com/silverstripe-labs/silverstripe-fulltextsearch), v2.1.0 or up.
 
 ## Installation
-
-### Composer
 
 Edit your project-wide composer.json file as follows; in the "require" block add:
 
@@ -32,13 +22,14 @@ Edit your project-wide composer.json file as follows; in the "require" block add
 Then in the root of your project run:
 
     #> composer update silverstripe/faq
+	
+Or just
 
-### Web
+    composer install silverstripe/faq
 
-To begin the installation first download the module online. Download the module as a zip file from the github page.
+Run a database rebuild by visiting *http://yoursite.com/dev/build*. This will add the required database
+columns and tables for the module to function.
 
-After you have finished downloading the file, extract the downloaded file to your site's root
-folder and ensure the name of the module is `faq`.
 
 ### Configuring Solr
 The module assumes you already have Solr installed and configured. If using CWP, then it will be configured for you.
@@ -75,19 +66,15 @@ Solr::configure_server($solrOptions);
 
 
 This code would go on `mysite/_config.php`.
+ 
+### Using CWP
 
-### All
+If your using the module with CWP, extra requirements should be noticed (even if not required on composer for this project)
 
-Run a database rebuild by visiting *http://yoursite.com/dev/build*. This will add the required database
-columns and tables for the module to function.
+ * CWP 1.1.1
+ * CWP-core 1.1.2
 
-## What does it do
-
-Just by adding the module to one project, you'll get a ModelAdmin for FAQs, where you can manage Questions & Answers.
-You only need to add an FAQPage type (comes with the module), and some questions and answers. Oh, an remember
-to do `Solr_Configure` and `Solr_ReIndex`.
-
-The module comes with its own Solr search index, customized to have a fuzzy search, and has its own file for stopwords and synonyms.
+Also notice that some custom search configurations from CWP don't apply to FAQs out of the box. Manual configuration will need to be applied to make it resemble CWP conf. There's a `cwp-version` tag that doesn't require any other configuration, but will not get future updates.
 
 
 ## Quickstart
@@ -151,3 +138,4 @@ If the FAQPage doesn't have any category selected, it will display all FAQs.
 
 - Get static config variables from yml files for controller
 - Pagetypes, search index and dataobjects easily extendable
+- cwp manual configuration if not using `cwp-version`
