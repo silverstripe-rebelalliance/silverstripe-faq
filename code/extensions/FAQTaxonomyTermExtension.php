@@ -28,4 +28,32 @@ class FAQTaxonomyTermExtension extends DataExtension {
 		
 		return $taxonomy;
 	}
+	
+	
+	/**
+	 * 
+	 */
+	public function getChildDeep(array $filter) {
+		// check if this matches filter
+		$match = true;
+		foreach($filter as $key => $value) {
+			if (isset($this->owner->$key) && $this->owner->$key != $value) {
+				$match = false;
+			}
+		}
+
+		if ($match) {
+			return $this->owner;
+		}
+		
+		// if not, loop over children and run this method
+		foreach($this->owner->Children() as $child) {
+			$response = $child->getChildDeep($filter);
+			if ($response != null) {
+				return $response;
+			}
+		}
+				
+		return null;
+	}
 }

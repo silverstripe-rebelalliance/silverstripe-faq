@@ -14,6 +14,10 @@ class FAQAdmin extends ModelAdmin {
 	);
 
 	private static $menu_title = 'FAQs';
+	
+	private static $model_importers = array(
+		'FAQ' => 'FAQCsvBulkLoader'
+	);
 
 	/**
 	 * Overload ModelAdmin->getExportFields() so that we can export keywords.
@@ -23,7 +27,8 @@ class FAQAdmin extends ModelAdmin {
 		return array(
 			'Question' => 'Question',
 			'Answer' => 'Answer',
-			'Keywords' => 'Keywords'
+			'Keywords' => 'Keywords',
+			'Category.Name' => 'Category'
 		);
 	}
 }
