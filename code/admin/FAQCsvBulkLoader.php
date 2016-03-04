@@ -17,7 +17,8 @@ class FAQCsvBulkLoader extends CsvBulkLoader {
 	);
    
 	/**
-	 * We don't want to create categories we don't find on the root taxonomy
+	 * Avoids creating new categories if not found in the root taxonomy
+	 * It will get the right CategoryID link, or leave the FAQ without categories.
 	 */
 	public static function getCategoryByName(&$obj, $val, $record) {
 		$val = trim($val);
@@ -27,7 +28,7 @@ class FAQCsvBulkLoader extends CsvBulkLoader {
 			return null;
 		}
 
-		$category = $root->getChildDeep(array('Name' => $val));
+		$category = $root->getChildDeep(array('Name' => trim($val)));
 		
 		if($category && $category->exists()) {
 			$obj->CategoryID = $category->ID;

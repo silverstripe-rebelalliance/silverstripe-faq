@@ -5,7 +5,8 @@
 class FAQTaxonomyTermExtension extends DataExtension {
 	
 	/**
-	 *
+	 * Get's a taxonomy by name
+	 * @param string $name of the taxonomy to search for
 	 */
 	public static function getByName($name) {
 		$taxonomy = TaxonomyTerm::get()->filter('Name', $name)->first();
@@ -17,7 +18,9 @@ class FAQTaxonomyTermExtension extends DataExtension {
 	}
 	
 	/**
-	 *
+	 * Finds or creates a taxonomy.
+	 * @param array $find params to find a taxonomy
+	 * @param array $create used if taxonomy could not be found with above params
 	 */
 	public static function getOrCreate($find, $create) {
 		$taxonomy = TaxonomyTerm::get()->filter($find)->first();
@@ -31,7 +34,10 @@ class FAQTaxonomyTermExtension extends DataExtension {
 	
 	
 	/**
-	 * 
+	 * Traverses through the whole tree of taxonomies, filtering by $filter.
+	 * Gets the first taxonomy that matches the filters
+	 *
+	 * @param array $filter
 	 */
 	public function getChildDeep(array $filter) {
 		// check if this matches filter
