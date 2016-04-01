@@ -139,3 +139,4 @@ If the FAQPage doesn't have any category selected, it will display all FAQs.
 - Get static config variables from yml files for controller
 - Pagetypes, search index and dataobjects easily extendable
 - cwp manual configuration if not using `cwp-version`
+- make this a supported SS module

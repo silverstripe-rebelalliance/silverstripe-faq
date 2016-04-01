@@ -1,12 +1,12 @@
 {
-    "name": "silverstripe/faq",
+    "name": "d-rivera-c/silverstripe-faq",
     "description": "Provides Q & A pages and search",
     "type": "silverstripe-module",
     "homepage": "https://code.platform.silverstripe.com/supervillains/silverstripe-faq",
-    "keywords": ["silverstripe", "search", "faq"],
+    "keywords": ["silverstripe", "search", "faq", "solr"],
     "license": "BSD-3-Clause",
     "support": {
-        "issues": "https://code.platform.silverstripe.com/supervillains/silverstripe-faq/issues"
+        "issues": "https://github.com/d-rivera-c/silverstripe-faq/issues"
     },
     "authors": [
         {
@@ -16,10 +16,6 @@
         {
             "name": "drivera",
             "email": "denise@silverstripe.com"
-        },
-        {
-            "name": "benmanu",
-            "email": "ben@silverstripe.com"
         }
     ],
     "require": {
@@ -29,5 +25,8 @@
     },
     "require-dev": {
         "silverstripe/fulltextsearch-localsolr": "dev-master"
-    }
+    },
+	"extra": {
+		"installer-name": "faq"
+	}
 }
