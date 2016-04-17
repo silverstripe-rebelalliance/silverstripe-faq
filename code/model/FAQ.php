@@ -102,23 +102,35 @@ class FAQ extends DataObject
     }
 
     /**
-     * Gets a link to the view page for each FAQ
-  *
+     * Gets a link to the view page for each FAQ. If the tracking ID is set on
+     * this object include it as a GET param in the link to this article.
+     *
      * @return string Link to view this particular FAQ on the current FAQPage.
      */
     public function getLink()
     {
         $faqPage = Controller::curr();
+        $link = '';
 
         if ($faqPage->exists() && $this->ID != 0) {
-            return Controller::join_links(
-                $faqPage->Link(),
-                "view/",
-                $this->ID
-            );
+            // Include tracking ID if it is set
+            if (isset($this->trackingID) && $this->trackingID) {
+                $link = Controller::join_links(
+                    $faqPage->Link(),
+                    "view/",
+                    $this->ID,
+                    '?t=' . $this->trackingID
+                );
+            } else {
+                $link = Controller::join_links(
+                    $faqPage->Link(),
+                    "view/",
+                    $this->ID
+                );
+            }
         }
 
-        return '';
+        return $link;
     }
 
     /**
