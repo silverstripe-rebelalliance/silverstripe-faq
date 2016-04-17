@@ -16,19 +16,23 @@ class FAQResults_Extension extends Extension
         'Search' => 'FAQSearch'
     );
 
-    public function canView($member = false) {
+    public function canView($member = false)
+    {
         return Permission::check('FAQ_VIEW_SEARCH_LOGS');
     }
 
-    public function canEdit($member = false) {
+    public function canEdit($member = false)
+    {
         return Permission::check('FAQ_EDIT_SEARCH_LOGS');
     }
 
-    public function canDelete($member = false) {
+    public function canDelete($member = false)
+    {
         return false;
     }
 
-    public function canCreate($member = false) {
+    public function canCreate($member = false)
+    {
         return false;
     }
 }
