@@ -54,10 +54,9 @@ class FAQResults extends DataObject
     );
 
     private static $summary_fields = array(
-        'ArticleSet',
-        'SetSize',
-        'Useful',
-        'Comment'
+        'Created.Nice' => 'Date',
+        'ArticleSet' => 'Articles',
+        'SetSize' => 'Total'
     );
 }
 
@@ -74,6 +73,7 @@ class FAQResults_Article extends DataObject
     );
 
     private static $summary_fields = array(
+        'Created.Nice' => 'Date',
         'FAQ.ID' => 'Article ID',
         'FAQ.Question' => 'Article',
         'Useful' => 'Useful',
