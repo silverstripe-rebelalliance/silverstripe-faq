@@ -24,6 +24,30 @@ class FAQSearch extends DataObject implements PermissionProvider
         'Articles' => 'FAQResults_Article'
     );
 
+    public function getCMSFields() {
+        $fields = parent::getCMSFields();
+
+        $fields->removeByName(array('Term', 'SessionID', 'TotalResults'));
+
+        $fields->addFieldsToTab('Root.Main', array(
+            ReadonlyField::create('Term', 'Search term'),
+            ReadonlyField::create('SessionID', 'Session ID'),
+            ReadonlyField::create('TotalResults', 'Total results given')
+        ));
+
+        $config = $fields->dataFieldByName('Articles')->getConfig();
+        $config->removeComponentsByType('GridFieldDeleteAction');
+        $config->removeComponentsByType('GridFieldAddExistingAutocompleter');
+        $config->removeComponentsByType('GridFieldAddNewButton');
+
+        $config = $fields->dataFieldByName('Results')->getConfig();
+        $config->removeComponentsByType('GridFieldDeleteAction');
+        $config->removeComponentsByType('GridFieldAddExistingAutocompleter');
+        $config->removeComponentsByType('GridFieldAddNewButton');
+
+        return $fields;
+    }
+
     public function canView($member = false)
     {
         return Permission::check('FAQ_VIEW_SEARCH_LOGS');

@@ -58,6 +58,33 @@ class FAQResults extends DataObject
         'ArticleSet' => 'Articles',
         'SetSize' => 'Total'
     );
+
+    public function getCMSFields() {
+        $fields = parent::getCMSFields();
+
+        $fields->removeByName(array('ArticleSet', 'SearchID', 'SetSize', 'Useful', 'Comment'));
+
+        $articleIDs = json_decode($this->ArticleSet);
+        // get FAQs listed, the 'FIELD(ID,{IDs})' ensures they appear in the order provided
+        $articles = DataObject::get('FAQ', 'ID IN (' . implode(',', $articleIDs) . ')', 'FIELD(ID,' . implode(',', $articleIDs) .')');
+        $articleSet = GridField::create('FAQ', 'Article Set', $articles);
+
+        $config = $articleSet->getConfig();
+        // Edit Button doesn't work due to being no relationship
+        //$config->addComponent(new GridFieldEditButton());
+
+        $fields->addFieldsToTab('Root.Main', array(
+            ReadonlyField::create('SetSize', 'Size of this results set'),
+            $articleSet
+        ));
+
+        $config = $fields->dataFieldByName('ArticlesViewed')->getConfig();
+        $config->removeComponentsByType('GridFieldDeleteAction');
+        $config->removeComponentsByType('GridFieldAddExistingAutocompleter');
+        $config->removeComponentsByType('GridFieldAddNewButton');
+
+        return $fields;
+    }
 }
 
 /**
