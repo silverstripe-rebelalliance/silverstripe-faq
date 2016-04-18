@@ -65,4 +65,69 @@ class FAQSearch_Admin extends ModelAdmin
     );
 
     private static $menu_title = 'Search Log';
+
+    public function getList() {
+        $list = parent::getList();
+        $params = $this->getRequest()->requestVar('q');
+
+        // TODO: move this to SearchContext
+        if (isset($params['Useful']) && $params['Useful']) {
+            $useful = Convert::raw2sql($params['Useful']);
+
+            $list = $list->filter('Results.Useful:ExactMatch', $useful);
+        }
+
+        if (isset($params['HasResults']) && $params['HasResults']) {
+            $filter = 'TotalResults' . (($params['HasResults'] == 'results') ? ':GreaterThanOrEqual' : ':LessThan');
+            $list = $list->filter($filter, 1);
+        }
+
+        return $list;
+    }
+    public function getSearchContext() {
+        $context = parent::getSearchContext();
+        $fields = $context->getFields();
+
+        $fields->removeByName('q[Created]');
+        $context->removeFilterByName('Created');
+        $fields->removeByName('q[TotalResults]');
+        $context->removeFilterByName('TotalResults');
+
+        // add before filter
+        $date = new DateField(sprintf('q[%s]', 'CreatedBefore'), 'Created before (inclusive)');
+        $date->setRightTitle(date('Y-m-d'));
+        $date->setAttribute('placeholder', 'yyyy-mm-dd');
+
+        $dateFilter = new LessThanOrEqualFilter('CreatedBefore');
+        $dateFilter->setName('Created');
+
+        $context->addField($date);
+        $context->addFilter($dateFilter);
+
+        // add after filter
+        $date = new DateField(sprintf('q[%s]', 'CreatedAfter'), 'Created after');
+        $date->setRightTitle(date('Y-m-d'));
+        $date->setAttribute('placeholder', 'yyyy-mm-dd');
+
+        $dateFilter = new GreaterThanFilter('CreatedAfter');
+        $dateFilter->setName('Created');
+
+        $context->addField($date);
+        $context->addFilter($dateFilter);
+
+        // what articles were rated
+        $usefulObject = singleton('FAQResults_Article')->dbObject('Useful');
+        $useful = new DropdownField(sprintf('q[%s]', 'Useful'), 'Usefulness', $usefulObject->enumValues());
+        $useful->setEmptyString('Any');
+
+        $context->addField($useful);
+
+        // check if any results were returned
+        $results = new DropdownField(sprintf('q[%s]', 'HasResults'), 'Total results filter', array('results' => 'With results', 'noresults' => 'Without results'));
+        $results->setEmptyString('Any');
+
+        $context->addField($results);
+
+        return $context;
+    }
 }
