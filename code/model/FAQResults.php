@@ -65,7 +65,7 @@ class FAQResults extends DataObject
     {
         $fields = parent::getCMSFields();
 
-        $fields->removeByName(array('ArticleSet', 'SessionID', 'SearchID', 'Useful', 'Comment'));
+        $fields->removeByName(array('ArticleSet', 'SessionID', 'SearchID', 'Useful', 'Comment', 'Archived'));
 
         $articleIDs = json_decode($this->ArticleSet);
         // get FAQs listed, the 'FIELD(ID,{IDs})' ensures they appear in the order provided
@@ -110,7 +110,7 @@ class FAQResults_Article extends DataObject
     {
         $fields = parent::getCMSFields();
 
-        $fields->removeByName(array('FAQID', 'ResultSetID', 'SearchID', 'Useful', 'Comment'));
+        $fields->removeByName(array('FAQID', 'ResultSetID', 'SearchID', 'Useful', 'Comment', 'Archived'));
 
         $fields->addFieldsToTab('Root.Main', array(
             ReadonlyField::create('Article', 'Article Question', $this->FAQ()->Question),

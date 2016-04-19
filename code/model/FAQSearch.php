@@ -73,8 +73,7 @@ class FAQSearch extends DataObject implements PermissionProvider
 
     public function onBeforeWrite()
     {
-        if ($this->isChanged('Archived'))
-        {
+        if ($this->isChanged('Archived')) {
             $this->archiveResults($this->Archived);
         }
         parent::onBeforeWrite();
@@ -88,14 +87,12 @@ class FAQSearch extends DataObject implements PermissionProvider
         $results = $this->Results()->filter('Archived', !$archive);
         $articles = $this->Articles()->filter('Archived', !$archive);
 
-        foreach ($results as $result)
-        {
+        foreach ($results as $result) {
             $result->Archived = $archive;
             $result->write();
         }
 
-        foreach ($articles as $article)
-        {
+        foreach ($articles as $article) {
             $article->Archived = $archive;
             $article->write();
         }
