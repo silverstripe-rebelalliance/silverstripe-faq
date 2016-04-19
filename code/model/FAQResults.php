@@ -10,7 +10,8 @@ class FAQResults_Extension extends Extension
     private static $db = array(
         'Useful' => "Enum('Y,N,U','U')", // Yes, No, Unset
         'Comment' => 'Varchar(255)',
-        'SessionID' => 'Varchar(255)'
+        'SessionID' => 'Varchar(255)',
+        'Archived' => 'Boolean'
     );
 
     private static $has_one = array(
@@ -47,8 +48,7 @@ class FAQResults extends DataObject
 
     private static $db = array(
         'ArticleSet' => 'Varchar(255)',
-        'SetSize' => 'Int',
-        'Archived' => 'Boolean'
+        'SetSize' => 'Int'
     );
 
     private static $has_many = array(
@@ -96,10 +96,6 @@ class FAQResults extends DataObject
 class FAQResults_Article extends DataObject
 {
     private static $singular_name = 'Article';
-
-    private static $db = array(
-        'Archived' => 'Boolean'
-    );
 
     private static $has_one = array(
         'FAQ' => 'FAQ',

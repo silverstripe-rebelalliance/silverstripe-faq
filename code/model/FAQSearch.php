@@ -70,34 +70,30 @@ class FAQSearch extends DataObject implements PermissionProvider
 
     public function onBeforeWrite()
     {
-        if ($this->Archived) {
-            $this->archiveResults();
+        if ($this->isChanged('Archived'))
+        {
+            $this->archiveResults($this->Archived);
         }
         parent::onBeforeWrite();
     }
 
     /**
-     * Archive this FAQSearch, sets all children Archived as well
-     */
-    public function doArchive()
-    {
-        $this->Archived = true;
-
-        $this->archiveResults();
-    }
-
-    /**
      * Archives FAQSearch children
      */
-    protected function archiveResults()
+    protected function archiveResults($archive = true)
     {
-        foreach ($this->Results() as $result) {
-            $result->Archived = true;
+        $results = $this->Results()->filter('Archived', !$archive);
+        $articles = $this->Articles()->filter('Archived', !$archive);
+
+        foreach ($results as $result)
+        {
+            $result->Archived = $archive;
             $result->write();
         }
 
-        foreach ($this->Articles() as $article) {
-            $article->Archived = true;
+        foreach ($articles as $article)
+        {
+            $article->Archived = $archive;
             $article->write();
         }
     }
@@ -153,7 +149,8 @@ class FAQSearch_Admin extends ModelAdmin
 /**
  * Custom Search Context for FAQSearch, with different filters to the ones provided by scaffolding
  */
-class FAQSearch_SearchContext extends SearchContext {
+class FAQSearch_SearchContext extends SearchContext
+{
 
     public function __construct($modelClass, $fields = null, $filters = null)
     {
@@ -195,7 +192,7 @@ class FAQSearch_SearchContext extends SearchContext {
         $this->addField($results);
 
         // filter for whether the search log was archived or not
-        $archived = new DropdownField('IsArchived', 'Was archived searches', array('archived' => 'Archived', 'notarchived' => 'Not Archived'), 'notarchived');
+        $archived = new DropdownField('IsArchived', 'Show archived searches', array('archived' => 'Archived', 'notarchived' => 'Not Archived'));
         $archived->setEmptyString('Any');
 
         $this->addField($archived);
@@ -217,7 +214,7 @@ class FAQSearch_SearchContext extends SearchContext {
         }
 
         // default not archived, so will cater for that
-        if (!isset($params['IsArchived']) || $params['IsArchived']) {
+        if (isset($params['IsArchived']) && $params['IsArchived']) {
             $archived = (isset($params['IsArchived']) && $params['IsArchived'] == 'archived');
             $list = $list->filter('Archived', $archived);
         }
