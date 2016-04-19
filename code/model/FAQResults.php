@@ -59,10 +59,11 @@ class FAQResults extends DataObject
         'SetSize' => 'Total'
     );
 
-    public function getCMSFields() {
+    public function getCMSFields()
+    {
         $fields = parent::getCMSFields();
 
-        $fields->removeByName(array('ArticleSet', 'SearchID', 'SetSize', 'Useful', 'Comment'));
+        $fields->removeByName(array('ArticleSet', 'SearchID', 'Useful', 'Comment'));
 
         $articleIDs = json_decode($this->ArticleSet);
         // get FAQs listed, the 'FIELD(ID,{IDs})' ensures they appear in the order provided
@@ -106,6 +107,26 @@ class FAQResults_Article extends DataObject
         'Useful' => 'Useful',
         'Comment' => 'Comment'
     );
+
+    public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+
+        $fields->removeByName(array('FAQID', 'ResultSetID', 'SearchID', 'Useful', 'Comment'));
+
+        $fields->addFieldsToTab('Root.Main', array(
+            ReadonlyField::create('Article', 'Article Question', $this->FAQ()->Question),
+            ReadonlyField::create('Useful', 'Useful rating'),
+            ReadonlyField::create('Comment', 'Comments')
+        ));
+
+        return $fields;
+    }
+
+    public function getTitle()
+    {
+        return "Feedback to '{$this->FAQ()->Question}'";
+    }
 }
 
 

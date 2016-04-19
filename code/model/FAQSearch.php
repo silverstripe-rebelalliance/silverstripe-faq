@@ -24,10 +24,9 @@ class FAQSearch extends DataObject implements PermissionProvider
         'Articles' => 'FAQResults_Article'
     );
 
-    public function getCMSFields() {
+    public function getCMSFields()
+    {
         $fields = parent::getCMSFields();
-
-        $fields->removeByName(array('Term', 'SessionID', 'TotalResults'));
 
         $fields->addFieldsToTab('Root.Main', array(
             ReadonlyField::create('Term', 'Search term'),
@@ -46,6 +45,11 @@ class FAQSearch extends DataObject implements PermissionProvider
         $config->removeComponentsByType('GridFieldAddNewButton');
 
         return $fields;
+    }
+
+    public function getTitle()
+    {
+        return "Search '$this->Term'";
     }
 
     public function canView($member = false)
@@ -90,7 +94,8 @@ class FAQSearch_Admin extends ModelAdmin
 
     private static $menu_title = 'Search Log';
 
-    public function getList() {
+    public function getList()
+    {
         $list = parent::getList();
         $params = $this->getRequest()->requestVar('q');
 
@@ -108,7 +113,9 @@ class FAQSearch_Admin extends ModelAdmin
 
         return $list;
     }
-    public function getSearchContext() {
+
+    public function getSearchContext()
+    {
         $context = parent::getSearchContext();
         $fields = $context->getFields();
 
