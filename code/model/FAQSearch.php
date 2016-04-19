@@ -9,7 +9,8 @@ class FAQSearch extends DataObject implements PermissionProvider
     private static $db = array(
         'Term' => 'Varchar(255)',
         'SessionID' => 'Varchar(255)',
-        'TotalResults' => 'Int'
+        'TotalResults' => 'Int',
+        'Archived' => 'Boolean'
     );
 
     // TODO: Summary of result sets and views associated with this search
@@ -45,6 +46,31 @@ class FAQSearch extends DataObject implements PermissionProvider
         $config->removeComponentsByType('GridFieldAddNewButton');
 
         return $fields;
+    }
+
+    public function onBeforeWrite() {
+        if ($this->Archived) {
+            $this->archiveResults();
+        }
+        parent::onBeforeWrite();
+    }
+
+    public function doArchive() {
+        $this->Archived = true;
+
+        $this->archiveResults();
+    }
+
+    protected function archiveResults() {
+        foreach ($this->Results() as $result) {
+            $result->Archived = true;
+            $result->write();
+        }
+
+        foreach ($this->Articles() as $article) {
+            $article->Archived = true;
+            $article->write();
+        }
     }
 
     public function getTitle()
@@ -111,6 +137,10 @@ class FAQSearch_Admin extends ModelAdmin
             $list = $list->filter($filter, 1);
         }
 
+        if (isset($params['IsArchived']) && $params['IsArchived']) {
+            $list = $list->filter('Archived', ($params['IsArchived'] == 'archived'));
+        }
+
         return $list;
     }
 
@@ -158,6 +188,12 @@ class FAQSearch_Admin extends ModelAdmin
         $results->setEmptyString('Any');
 
         $context->addField($results);
+
+        // check for archived or not
+        $archived = new DropdownField(sprintf('q[%s]', 'IsArchived'), 'Archived searches filter', array('archived' => 'Archived', 'notarchived' => 'Not Archived'), 'notarchived');
+        $archived->setEmptyString('Any');
+
+        $context->addField($archived);
 
         return $context;
     }
