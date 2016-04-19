@@ -9,7 +9,8 @@ class FAQResults_Extension extends Extension
 
     private static $db = array(
         'Useful' => "Enum('Y,N,U','U')", // Yes, No, Unset
-        'Comment' => 'Varchar(255)'
+        'Comment' => 'Varchar(255)',
+        'SessionID' => 'Varchar(255)'
     );
 
     private static $has_one = array(
