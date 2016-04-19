@@ -209,7 +209,8 @@ class FAQPage extends Page
 class FAQPage_Controller extends Page_Controller
 {
     private static $allowed_actions = array(
-        'view'
+        'view',
+        'RatingForm'
     );
 
     /**
@@ -251,6 +252,9 @@ class FAQPage_Controller extends Page_Controller
     */
     public function index()
     {
+        // Ensure that session is started for tracking behaviour, essential for linking behaviour to a user
+        Session::set('FAQPage', true);
+
         if ($this->request->getVar(self::$search_term_key) || $this->request->getVar(self::$search_category_key)) {
             return $this->renderSearch($this->search());
         }
@@ -271,26 +275,50 @@ class FAQPage_Controller extends Page_Controller
             $this->httpError(404);
         }
 
-        // Record the view of article and link it to the search and result set if the
-        // session ID matches
-        extract($this->getTrackingIDs($this->request->getVar('t')));
+        // Record the view of an article, linked to search query and results
         $sessID = session_id();
-        if ($sessID && $trackingSearchID) {
+        $ratingForm = null;
 
-            $searchLog = FAQSearch::get()->filter(array(
-                'ID' => $trackingSearchID,
-                'SessionID' => $sessID
+        if ($sessID && $this->request->getVar('t')) {
+            $sessionIDs = $this->getTrackingIDs($this->request->getVar('t'));
+
+            // If there is an article log for the same article attached to the search and results set logs, reuse it
+            $articleLog = FAQResults_Article::get()->filter(array(
+                'SearchID' => $sessionIDs['trackingSearchID'],
+                'ResultSetID' => $sessionIDs['trackingResultsID'],
+                'SessionID' => $sessID,
+                'FAQID' => $faq->ID
             ))->first();
 
-            if ($searchLog && $searchLog->exists()) {
-                $articleLogID = FAQResults_Article::create(array(
-                    'SearchID' => $trackingSearchID,
-                    'ResultSetID' => $trackingResultsID,
-                    'FAQID' => $faq->ID
-                ))->write();
+            if (!$articleLog || !$articleLog->exists()) {
+                // Check that the session matches before writing a new log for an article view
+                $searchLog = FAQSearch::get()->filter(array(
+                    'ID' => $sessionIDs['trackingSearchID'],
+                    'SessionID' => $sessID
+                ))->first();
+
+                if ($searchLog && $searchLog->exists()) {
+                    $articleLog = FAQResults_Article::create(array(
+                        'SearchID' => $sessionIDs['trackingSearchID'],
+                        'ResultSetID' => $sessionIDs['trackingResultsID'],
+                        'FAQID' => $faq->ID,
+                        'SessionID' => $sessID,
+                    ));
+                    $articleLog->write();
+                }
+            }
+
+            // Only generate the rating form if article log exists
+            if ($articleLog && $articleLog->exists()) {
+                $ratingForm = $this->RatingForm();
+                $ratingForm->loadDataFrom($articleLog);
             }
         }
-        return array('FAQ' => $faq);
+
+        return array(
+            'FAQ' => $faq,
+            'FAQRatingForm' => $ratingForm
+        );
     }
 
 
@@ -323,10 +351,11 @@ class FAQPage_Controller extends Page_Controller
             $searchResult = $this->doSearch($query, $start, $limit);
             $results = $searchResult->Matches;
 
-            // Log the search query and result set for the query
+            // Log the search query and result set for the query, link them to a session (ensure session is started)
             $sessID = session_id();
             if ($sessID) {
-                extract($this->getTrackingIDs($this->request->getVar('t')));
+                $sessionIDs = $this->getTrackingIDs($this->request->getVar('t'));
+                $trackingSearchID = $sessionIDs['trackingSearchID'];
 
                 // If the tracking ID is set then use existing search log if the log is for the same session
                 if ($trackingSearchID) {
@@ -349,7 +378,8 @@ class FAQPage_Controller extends Page_Controller
                     $resultsLogID = FAQResults::create(array(
                         'SearchID' => $searchLogID,
                         'ArticleSet' => json_encode(array_keys($results->map())),
-                        'SetSize' => count($results->map())
+                        'SetSize' => count($results->map()),
+                        'SessionID' => $sessID,
                     ))->write();
                 }
 
@@ -394,7 +424,8 @@ class FAQPage_Controller extends Page_Controller
      * @param  string $id ID from GET param in format id_id.
      * @return array      Array with the IDs extracted
      */
-    protected function getTrackingIDs($id) {
+    protected function getTrackingIDs($id)
+    {
         $ids = array();
         $parts = explode('_', $id);
         $ids['trackingSearchID'] = (isset($parts[0])) ? $parts[0] : null;
@@ -667,5 +698,69 @@ class FAQPage_Controller extends Page_Controller
     public function SearchResultMoreLink()
     {
         return _t('FAQPage.SearchResultMoreLink', $this->MoreLinkText);
+    }
+
+    /**
+     * Rating form, best to only display this form if a tracking ID can be set e.g: avoid using $RatingForm directly in
+     * the template @see view() above for example usage.
+     *
+     * @return Form The rating form
+     */
+    public function RatingForm() {
+
+        // Only show the rating form for users whose tracking ID matches session
+        $fields = FieldList::create(
+            OptionsetField::create('Useful', 'Rating', array(
+                'Y' => 'Helpful',
+                'N' => 'Unhelpful'
+            )),
+            TextareaField::create('Comment'),
+            HiddenField::create('ID', ''),
+            HoneypotField::create('MobilePhones_1', '') //Important name is not used on target data model
+        );
+        $actions = FieldList::create(
+            FormAction::create('rate', 'Submit')
+        );
+        $form = Form::create(
+            $this,
+            'RatingForm',
+            $fields,
+            $actions
+        );
+        return $form;
+    }
+
+    /**
+     * Rate an article, this will find the article log to update and write to it.
+     *
+     * @param  Array          $data    Submitted form data
+     * @param  Form           $form    Submitted form object
+     * @param  SS_HTTPRequest $request Request
+     * @return HTTPResponse            Redirects back
+     */
+    public function rate(Array $data, Form $form, SS_HTTPRequest $request) {
+
+        // If the session and matches for the article log, then add rating/comment
+        $articleLogID = (int) $data['ID'];
+        $sessID = session_id();
+        if ($sessID && $articleLogID) {
+            $articleLog = FAQResults_Article::get()->filter(array(
+                'ID' => $articleLogID,
+                'SessionID' => $sessID
+            ))->first();
+
+            if ($articleLog && $articleLog->exists()) {
+                $articleLog->update(array(
+                    'Comment' => $data['Comment'],
+                    'Useful' => $data['Useful']
+                ))->write();
+            }
+        }
+
+        if (!Director::is_ajax()) {
+            $this->redirectBack();
+        } else {
+            //TODO: AJAX response here
+        }
     }
 }
