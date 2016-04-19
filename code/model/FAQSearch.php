@@ -48,20 +48,52 @@ class FAQSearch extends DataObject implements PermissionProvider
         return $fields;
     }
 
-    public function onBeforeWrite() {
+    /**
+     * Creates a custom FAQSearch search object, can override to prevent the field removals
+     *
+     * @return FAQSearch_SearchContext
+     */
+    public function getDefaultSearchContext()
+    {
+        $fields = $this->scaffoldSearchFields();
+        $filters = $this->defaultSearchFilters();
+
+        $fields->removeByName('Created');
+        $fields->removeByName('TotalResults');
+
+        unset($filters['Created']);
+        unset($filters['TotalResults']);
+
+        return new FAQSearch_SearchContext(
+            $this->class,
+            $fields,
+            $filters
+        );
+    }
+
+    public function onBeforeWrite()
+    {
         if ($this->Archived) {
             $this->archiveResults();
         }
         parent::onBeforeWrite();
     }
 
-    public function doArchive() {
+    /**
+     * Archive this FAQSearch, sets all children Archived as well
+     */
+    public function doArchive()
+    {
         $this->Archived = true;
 
         $this->archiveResults();
     }
 
-    protected function archiveResults() {
+    /**
+     * Archives FAQSearch children
+     */
+    protected function archiveResults()
+    {
         foreach ($this->Results() as $result) {
             $result->Archived = true;
             $result->write();
@@ -119,13 +151,63 @@ class FAQSearch_Admin extends ModelAdmin
     );
 
     private static $menu_title = 'Search Log';
+}
 
-    public function getList()
+/**
+ * Custom Search Context for FAQSearch, with different filters to the ones provided by scaffolding
+ */
+class FAQSearch_SearchContext extends SearchContext {
+
+    public function __construct($modelClass, $fields = null, $filters = null)
     {
-        $list = parent::getList();
-        $params = $this->getRequest()->requestVar('q');
+        parent::__construct($modelClass, $fields, $filters);
 
-        // TODO: move this to SearchContext
+        // add before filter
+        $date = new DateField('CreatedBefore', 'Created before (inclusive)');
+        $date->setRightTitle('e.g. ' . date('Y-m-d'));
+        $date->setAttribute('placeholder', 'yyyy-mm-dd');
+
+        $dateFilter = new LessThanOrEqualFilter('CreatedBefore');
+        $dateFilter->setName('Created');
+
+        $this->addField($date);
+        $this->addFilter($dateFilter);
+
+        // add after filter
+        $date = new DateField('CreatedAfter', 'Created after');
+        $date->setRightTitle('e.g. ' . date('Y-m-d'));
+        $date->setAttribute('placeholder', 'yyyy-mm-dd');
+
+        $dateFilter = new GreaterThanFilter('CreatedAfter');
+        $dateFilter->setName('Created');
+
+        $this->addField($date);
+        $this->addFilter($dateFilter);
+
+        // filter based on what articles were rated
+        $usefulObject = singleton('FAQResults_Article')->dbObject('Useful');
+        $useful = new DropdownField('Useful', 'Usefulness rated articles', $usefulObject->enumValues());
+        $useful->setEmptyString('Any');
+
+        $this->addField($useful);
+
+        // filter if any results were returned
+        $results = new DropdownField('HasResults', 'Has results', array('results' => 'With results', 'noresults' => 'Without results'));
+        $results->setEmptyString('Any');
+
+        $this->addField($results);
+
+        // filter for whether the search log was archived or not
+        $archived = new DropdownField('IsArchived', 'Was archived searches', array('archived' => 'Archived', 'notarchived' => 'Not Archived'), 'notarchived');
+        $archived->setEmptyString('Any');
+
+        $this->addField($archived);
+    }
+
+    public function getResults($params, $sort = false, $limit = false)
+    {
+        $list = parent::getResults($params, $sort = false, $limit = false);
+
         if (isset($params['Useful']) && $params['Useful']) {
             $useful = Convert::raw2sql($params['Useful']);
 
@@ -137,64 +219,12 @@ class FAQSearch_Admin extends ModelAdmin
             $list = $list->filter($filter, 1);
         }
 
-        if (isset($params['IsArchived']) && $params['IsArchived']) {
-            $list = $list->filter('Archived', ($params['IsArchived'] == 'archived'));
+        // default not archived, so will cater for that
+        if (!isset($params['IsArchived']) || $params['IsArchived']) {
+            $archived = (isset($params['IsArchived']) && $params['IsArchived'] == 'archived');
+            $list = $list->filter('Archived', $archived);
         }
 
         return $list;
-    }
-
-    public function getSearchContext()
-    {
-        $context = parent::getSearchContext();
-        $fields = $context->getFields();
-
-        $fields->removeByName('q[Created]');
-        $context->removeFilterByName('Created');
-        $fields->removeByName('q[TotalResults]');
-        $context->removeFilterByName('TotalResults');
-
-        // add before filter
-        $date = new DateField(sprintf('q[%s]', 'CreatedBefore'), 'Created before (inclusive)');
-        $date->setRightTitle(date('Y-m-d'));
-        $date->setAttribute('placeholder', 'yyyy-mm-dd');
-
-        $dateFilter = new LessThanOrEqualFilter('CreatedBefore');
-        $dateFilter->setName('Created');
-
-        $context->addField($date);
-        $context->addFilter($dateFilter);
-
-        // add after filter
-        $date = new DateField(sprintf('q[%s]', 'CreatedAfter'), 'Created after');
-        $date->setRightTitle(date('Y-m-d'));
-        $date->setAttribute('placeholder', 'yyyy-mm-dd');
-
-        $dateFilter = new GreaterThanFilter('CreatedAfter');
-        $dateFilter->setName('Created');
-
-        $context->addField($date);
-        $context->addFilter($dateFilter);
-
-        // what articles were rated
-        $usefulObject = singleton('FAQResults_Article')->dbObject('Useful');
-        $useful = new DropdownField(sprintf('q[%s]', 'Useful'), 'Usefulness', $usefulObject->enumValues());
-        $useful->setEmptyString('Any');
-
-        $context->addField($useful);
-
-        // check if any results were returned
-        $results = new DropdownField(sprintf('q[%s]', 'HasResults'), 'Total results filter', array('results' => 'With results', 'noresults' => 'Without results'));
-        $results->setEmptyString('Any');
-
-        $context->addField($results);
-
-        // check for archived or not
-        $archived = new DropdownField(sprintf('q[%s]', 'IsArchived'), 'Archived searches filter', array('archived' => 'Archived', 'notarchived' => 'Not Archived'), 'notarchived');
-        $archived->setEmptyString('Any');
-
-        $context->addField($archived);
-
-        return $context;
     }
 }
