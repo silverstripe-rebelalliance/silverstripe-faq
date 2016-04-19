@@ -88,7 +88,6 @@ class FAQ extends DataObject
         return new RequiredFields('Question', 'Answer');
     }
 
-
     /**
      * Filters items based on member permissions or other criteria,
      * such as if a state is generally available for the current record.

@@ -32,22 +32,25 @@ class FAQSearch extends DataObject implements PermissionProvider
     {
         $fields = parent::getCMSFields();
 
+        $fields->removeByName('SessionID');
+        $fields->removeFieldsFromTab('Root', array('Results', 'Articles'));
+
         $fields->addFieldsToTab('Root.Main', array(
             ReadonlyField::create('Term', 'Search term'),
-            ReadonlyField::create('SessionID', 'Session ID'),
-            ReadonlyField::create('TotalResults', 'Total results given')
+            ReadonlyField::create('TotalResults', 'Total results given'),
+            GridField::create(
+                'Results',
+                'Search results pages viewed',
+                $this->Results(),
+                GridFieldConfig_RecordEditor::create()
+            ),
+            GridField::create(
+                'Articles',
+                'Articles viewed',
+                $this->Articles(),
+                GridFieldConfig_RecordEditor::create()
+            )
         ));
-
-        $config = $fields->dataFieldByName('Articles')->getConfig();
-        $config->removeComponentsByType('GridFieldDeleteAction');
-        $config->removeComponentsByType('GridFieldAddExistingAutocompleter');
-        $config->removeComponentsByType('GridFieldAddNewButton');
-
-        $config = $fields->dataFieldByName('Results')->getConfig();
-        $config->removeComponentsByType('GridFieldDeleteAction');
-        $config->removeComponentsByType('GridFieldAddExistingAutocompleter');
-        $config->removeComponentsByType('GridFieldAddNewButton');
-
         return $fields;
     }
 

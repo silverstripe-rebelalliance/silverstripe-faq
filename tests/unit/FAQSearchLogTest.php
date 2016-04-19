@@ -130,7 +130,6 @@ class FAQSearchLogTest extends FunctionalTest
         $this->assertFalse($this->logArticle->canCreate());
     }
 
-
     /**
      * Log current member out by clearing session
      */

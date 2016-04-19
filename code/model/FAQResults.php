@@ -65,16 +65,12 @@ class FAQResults extends DataObject
     {
         $fields = parent::getCMSFields();
 
-        $fields->removeByName(array('ArticleSet', 'SearchID', 'Useful', 'Comment'));
+        $fields->removeByName(array('ArticleSet', 'SessionID', 'SearchID', 'Useful', 'Comment'));
 
         $articleIDs = json_decode($this->ArticleSet);
         // get FAQs listed, the 'FIELD(ID,{IDs})' ensures they appear in the order provided
         $articles = DataObject::get('FAQ', 'ID IN (' . implode(',', $articleIDs) . ')', 'FIELD(ID,' . implode(',', $articleIDs) .')');
-        $articleSet = GridField::create('FAQ', 'Article Set', $articles);
-
-        $config = $articleSet->getConfig();
-        // Edit Button doesn't work due to being no relationship
-        //$config->addComponent(new GridFieldEditButton());
+        $articleSet = GridField::create('FAQ', 'Article Set', $articles, GridFieldConfig_RecordViewer::create());
 
         $fields->addFieldsToTab('Root.Main', array(
             ReadonlyField::create('SetSize', 'Size of this results set'),
