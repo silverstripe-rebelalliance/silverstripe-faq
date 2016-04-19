@@ -13,11 +13,14 @@ class FAQSearch extends DataObject implements PermissionProvider
         'Archived' => 'Boolean'
     );
 
-    // TODO: Summary of result sets and views associated with this search
     private static $summary_fields = array(
         'Term' => 'Term',
         'Created.Nice' => 'Date',
         'TotalResults' => 'TotalResults'
+    );
+
+    private static $searchable_fields = array(
+        'Term' => 'Term'
     );
 
     private static $has_many = array(
@@ -57,12 +60,6 @@ class FAQSearch extends DataObject implements PermissionProvider
     {
         $fields = $this->scaffoldSearchFields();
         $filters = $this->defaultSearchFilters();
-
-        $fields->removeByName('Created');
-        $fields->removeByName('TotalResults');
-
-        unset($filters['Created']);
-        unset($filters['TotalResults']);
 
         return new FAQSearch_SearchContext(
             $this->class,
