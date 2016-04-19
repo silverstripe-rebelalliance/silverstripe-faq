@@ -208,7 +208,7 @@ class FAQSearch_SearchContext extends SearchContext {
         if (isset($params['Useful']) && $params['Useful']) {
             $useful = Convert::raw2sql($params['Useful']);
 
-            $list = $list->filter('Results.Useful:ExactMatch', $useful);
+            $list = $list->filter('Articles.Useful:ExactMatch', $useful);
         }
 
         if (isset($params['HasResults']) && $params['HasResults']) {
