@@ -47,7 +47,8 @@ class FAQResults extends DataObject
 
     private static $db = array(
         'ArticleSet' => 'Varchar(255)',
-        'SetSize' => 'Int'
+        'SetSize' => 'Int',
+        'Archived' => 'Boolean'
     );
 
     private static $has_many = array(
@@ -95,6 +96,10 @@ class FAQResults extends DataObject
 class FAQResults_Article extends DataObject
 {
     private static $singular_name = 'Article';
+
+    private static $db = array(
+        'Archived' => 'Boolean'
+    );
 
     private static $has_one = array(
         'FAQ' => 'FAQ',
