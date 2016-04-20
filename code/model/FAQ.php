@@ -5,7 +5,7 @@
  *
  * @see FAQAdmin for FAQ ModelAdmin.
  */
-class FAQ extends DataObject
+class FAQ extends DataObject implements PermissionProvider
 {
 
     private static $singular_name = 'FAQ';
@@ -114,18 +114,6 @@ class FAQ extends DataObject
     }
 
     /**
-     * Filters items based on member permissions or other criteria,
-     * such as if a state is generally available for the current record.
-     *
-     * @param  Member
-     * @return Boolean
-     */
-    public function canView($member = null)
-    {
-        return true;
-    }
-
-    /**
      * Gets a link to the view page for each FAQ. If the tracking ID is set on
      * this object include it as a GET param in the link to this article.
      *
@@ -197,5 +185,68 @@ class FAQ extends DataObject
             array('Name'=> $taxName, 'ParentID'=> 0)
         );
         return $root;
+    }
+
+    /**
+     * Filters items based on member permissions or other criteria,
+     * such as if a state is generally available for the current record.
+     *
+     * @param  Member
+     * @return Boolean
+     */
+    public function canView($member = null)
+    {
+        return true;
+    }
+
+    public function canEdit($member = null)
+    {
+        return Permission::check('FAQ_EDIT');
+    }
+
+    public function canDelete($member = null)
+    {
+        return Permission::check('FAQ_DELETE');
+    }
+
+    public function canCreate($member = null)
+    {
+        return Permission::check('FAQ_CREATE');
+    }
+
+    public function providePermissions()
+    {
+        return array(
+            'FAQ_EDIT' => array(
+                'name' => _t(
+                    'Faq.EditPermissionLabel',
+                    'Edit FAQs'
+                ),
+                'category' => _t(
+                    'Faq.Category',
+                    'FAQ'
+                ),
+            ),
+            'FAQ_DELETE' => array(
+                'name' => _t(
+                    'Faq.DeletePermissionLabel',
+                    'Delete FAQs'
+                ),
+                'category' => _t(
+                    'Faq.Category',
+                    'FAQ'
+                ),
+            ),
+            'FAQ_CREATE' => array(
+                'name' => _t(
+                    'Faq.CreatePermissionLabel',
+                    'Create FAQs'
+                ),
+                'category' => _t(
+                    'Faq.Category',
+                    'FAQ'
+                ),
+            )
+        );
     }
 }
