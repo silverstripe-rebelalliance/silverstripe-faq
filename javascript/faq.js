@@ -9,7 +9,9 @@
             $comment = $form.find('#Comment'),
             $actions = $form.find('.Actions');
 
-        $comment.hide();
+        if ($comment.find(':input').val()) {
+            $comment.hide();
+        }
         $actions.hide();
         $form.on('change', function () {
             var $useful = $usefuls.filter(':checked');
