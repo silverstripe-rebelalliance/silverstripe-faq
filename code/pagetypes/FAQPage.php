@@ -245,6 +245,17 @@ class FAQPage_Controller extends Page_Controller
         )
     );
 
+    /**
+     * Start a session by setting a dummy property. Sessions are essential for linking behaviour to a user.
+     */
+    public function startSession()
+    {
+        if (!Session::get('FAQPage')) {
+            // Ensure that session is started for tracking behaviour, essential for linking behaviour to a user
+            Session::set('FAQPage', true);
+        }
+    }
+
     /*
     * Renders the base search page if no search term is present.
     * Otherwise runs a search and renders the search results page.
@@ -252,13 +263,13 @@ class FAQPage_Controller extends Page_Controller
     */
     public function index()
     {
-        // Ensure that session is started for tracking behaviour, essential for linking behaviour to a user
-        Session::set('FAQPage', true);
+        SS_Log::log(new Exception(print_r($this->request, true)), SS_Log::NOTICE);
 
+
+        $this->startSession();
         if ($this->request->getVar(self::$search_term_key) || $this->request->getVar(self::$search_category_key)) {
             return $this->renderSearch($this->search());
         }
-
         return $this->render();
     }
 
@@ -270,7 +281,9 @@ class FAQPage_Controller extends Page_Controller
      */
     public function view(SS_HTTPRequest $request)
     {
+        $this->startSession();
         $faq = FAQ::get()->filter('ID', $request->param('ID'))->first();
+
         if ($faq === null) {
             $this->httpError(404);
         }
@@ -279,13 +292,13 @@ class FAQPage_Controller extends Page_Controller
         $sessID = session_id();
         $ratingForm = null;
 
-        if ($sessID && $this->request->getVar('t')) {
-            $sessionIDs = $this->getTrackingIDs($this->request->getVar('t'));
+        if ($sessID && $request->getVar('t')) {
+            $trackingIDs = $this->getTrackingIDs($request->getVar('t'));
 
             // If there is an article log for the same article attached to the search and results set logs, reuse it
             $articleLog = FAQResults_Article::get()->filter(array(
-                'SearchID' => $sessionIDs['trackingSearchID'],
-                'ResultSetID' => $sessionIDs['trackingResultsID'],
+                'SearchID' => $trackingIDs['trackingSearchID'],
+                'ResultSetID' => $trackingIDs['trackingResultsID'],
                 'SessionID' => $sessID,
                 'FAQID' => $faq->ID
             ))->first();
@@ -293,14 +306,14 @@ class FAQPage_Controller extends Page_Controller
             if (!$articleLog || !$articleLog->exists()) {
                 // Check that the session matches before writing a new log for an article view
                 $searchLog = FAQSearch::get()->filter(array(
-                    'ID' => $sessionIDs['trackingSearchID'],
+                    'ID' => $trackingIDs['trackingSearchID'],
                     'SessionID' => $sessID
                 ))->first();
 
                 if ($searchLog && $searchLog->exists()) {
                     $articleLog = FAQResults_Article::create(array(
-                        'SearchID' => $sessionIDs['trackingSearchID'],
-                        'ResultSetID' => $sessionIDs['trackingResultsID'],
+                        'SearchID' => $trackingIDs['trackingSearchID'],
+                        'ResultSetID' => $trackingIDs['trackingResultsID'],
                         'FAQID' => $faq->ID,
                         'SessionID' => $sessID,
                     ));
@@ -354,8 +367,8 @@ class FAQPage_Controller extends Page_Controller
             // Log the search query and result set for the query, link them to a session (ensure session is started)
             $sessID = session_id();
             if ($sessID) {
-                $sessionIDs = $this->getTrackingIDs($this->request->getVar('t'));
-                $trackingSearchID = $sessionIDs['trackingSearchID'];
+                $trackingIDs = $this->getTrackingIDs($this->request->getVar('t'));
+                $trackingSearchID = $trackingIDs['trackingSearchID'];
 
                 // If the tracking ID is set then use existing search log if the log is for the same session
                 if ($trackingSearchID) {
@@ -424,7 +437,7 @@ class FAQPage_Controller extends Page_Controller
      * @param  string $id ID from GET param in format id_id.
      * @return array      Array with the IDs extracted
      */
-    protected function getTrackingIDs($id)
+    public function getTrackingIDs($id)
     {
         $ids = array();
         $parts = explode('_', $id);

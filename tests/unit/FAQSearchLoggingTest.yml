@@ -19,14 +19,13 @@ FAQ:
 # ------------------------------------------
 FAQSearch:
   one:
-    Term: 'First search'
+    Term: 'Dummy Search'
     TotalResults: 20
+    SessionID: 12345
 FAQResults:
   one:
     SearchID: =>FAQSearch.one
-FAQResults_Article:
-  one:
-    SearchID: =>FAQSearch.one
+    SessionID: 12345
 
 # ------------------------------------------
 # Groups
@@ -34,9 +33,6 @@ FAQResults_Article:
 Group:
   admin:
     Title: Administrators
-  contentAuthors:
-    Title: Content Authors
-    Code: content-authors
 
 # ------------------------------------------
 # Members
@@ -48,17 +44,6 @@ Member:
     Email: admin@test.com
     Password: password
     Groups: =>Group.admin
-  contentAuthor:
-    FirstName: 'Penelope'
-    Surname: 'Creighton-Ward'
-    Email: penny@example.com
-    Password: password
-    Groups: =>Group.contentAuthors
-  noPerms:
-    FirstName: 'Aloysius',
-    Surname: 'Parker'
-    Email: butler@example.com
-    Password: password
 
 # ------------------------------------------
 # Permissions
@@ -67,9 +52,3 @@ Permission:
    admin:
     Code: ADMIN
     GroupID: =>Group.admin
-  viewLogs:
-    Code: FAQ_VIEW_SEARCH_LOGS
-    GroupID: =>Group.contentAuthors
-  editLogs:
-    Code: FAQ_EDIT_SEARCH_LOGS
-    GroupID: =>Group.contentAuthors

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * DataObject for a single FAQ related to the FAQ search module.
  * Provides db fields for a question and an answer.
