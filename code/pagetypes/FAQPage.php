@@ -263,9 +263,6 @@ class FAQPage_Controller extends Page_Controller
     */
     public function index()
     {
-        SS_Log::log(new Exception(print_r($this->request, true)), SS_Log::NOTICE);
-
-
         $this->startSession();
         if ($this->request->getVar(self::$search_term_key) || $this->request->getVar(self::$search_category_key)) {
             return $this->renderSearch($this->search());

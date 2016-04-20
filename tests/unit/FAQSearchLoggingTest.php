@@ -290,6 +290,131 @@ class FAQSearchLoggingTest extends FunctionalTest
     }
 
     /**
+     * Different session to the current log does not get the Rating form.
+     * Prevents sharing a link with tracking GET param and having logs generated/altered.
+     */
+    public function testRatingFormDifferentSession()
+    {
+        $search = FAQSearch::get()->first();
+        $sessionID = 6543219;
+        $this->assertTrue($search->SessionID != $sessionID);
+
+        $faq = $this->objFromFixture('FAQ', 'one');
+        $link = Director::makeRelative($this->faqPage->Link('view') . '/' . $faq->ID);
+
+        $request = new SS_HTTPRequest('GET', $link, array(
+            't' => '1_1'
+        ));
+        // Need to set params in the request explicitly apparently
+        $request->setRouteParams(array(
+            'ID' => 1
+        ));
+        $controller = new FAQPage_Controller();
+
+        session_id($search->SessionID);
+        $render = $controller->view($request);
+        $this->assertEquals(get_class($render['FAQRatingForm']), 'Form');
+
+        session_id($sessionID);
+        $render = $controller->view($request);
+        $this->assertEquals($render['FAQRatingForm'], null);
+    }
+
+    /**
+     * Rating or leaving a comment updates the log for an article.
+     */
+    public function testRating()
+    {
+        $search = FAQSearch::get()->first();
+
+        $faq = $this->objFromFixture('FAQ', 'one');
+        $link = Director::makeRelative($this->faqPage->Link('view') . '/' . $faq->ID);
+
+        $request = new SS_HTTPRequest('GET', $link, array(
+            't' => '1_1'
+        ));
+        // Need to set params in the request explicitly apparently
+        $request->setRouteParams(array(
+            'ID' => 1
+        ));
+        $controller = new FAQPage_Controller();
+
+        session_id($search->SessionID);
+        $render = $controller->view($request);
+
+        $articles = FAQResults_Article::get();
+        $this->assertEquals($articles->count(), 1);
+
+        $data = array(
+            'ID' => $articles->last()->ID,
+            'Useful' => 'Y',
+            'Comment' => 'Very useful article.',
+            'MobilePhones_1' => null
+        );
+        $form = $render['FAQRatingForm'];
+        $request = new SS_HTTPRequest('GET', $this->faqPage->Link('RatingForm'));
+
+        $controller->rate($data, $form, $request);
+        $articles = FAQResults_Article::get();
+        $this->assertEquals($articles->count(), 1);
+
+        $log = $articles->last();
+        $this->assertEquals($log->SessionID, $search->SessionID);
+        $this->assertEquals($log->SearchID, 1);
+        $this->assertEquals($log->ResultSetID, 1);
+        $this->assertEquals($log->FAQID, $faq->ID);
+        $this->assertEquals($log->Useful, $data['Useful']);
+        $this->assertEquals($log->Comment, $data['Comment']);
+    }
+
+    /**
+     * When session is different there is no change to the article log when rating submitted.
+     */
+    public function testRatingDifferentSession()
+    {
+        $search = FAQSearch::get()->first();
+        $sessionID = 6543219;
+        $this->assertTrue($search->SessionID != $sessionID);
+
+        $faq = $this->objFromFixture('FAQ', 'one');
+        $link = Director::makeRelative($this->faqPage->Link('view') . '/' . $faq->ID);
+
+        $request = new SS_HTTPRequest('GET', $link, array(
+            't' => '1_1'
+        ));
+        // Need to set params in the request explicitly apparently
+        $request->setRouteParams(array(
+            'ID' => 1
+        ));
+        $controller = new FAQPage_Controller();
+
+        session_id($search->SessionID);
+        $render = $controller->view($request);
+
+        $articles = FAQResults_Article::get();
+        $this->assertEquals($articles->count(), 1);
+        $origLog = $articles->last();
+
+        $data = array(
+            'ID' => $articles->last()->ID,
+            'Useful' => 'Y',
+            'Comment' => 'Very useful article.',
+            'MobilePhones_1' => null
+        );
+        $form = $render['FAQRatingForm'];
+        $request = new SS_HTTPRequest('GET', $this->faqPage->Link('RatingForm'));
+
+        session_id($sessionID);
+
+        $controller->rate($data, $form, $request);
+        $articles = FAQResults_Article::get();
+        $this->assertEquals($articles->count(), 1);
+
+        $log = $articles->last();
+        $this->assertEquals($log->toMap(), $origLog->toMap());
+    }
+
+    /**
      * Log current member out by clearing session
      */
     private function logOut()
