@@ -126,8 +126,26 @@ class FAQSearch extends DataObject implements PermissionProvider
     public function providePermissions()
     {
         return array(
-            'FAQ_VIEW_SEARCH_LOGS' => 'View FAQ search logs',
-            'FAQ_EDIT_SEARCH_LOGS' => 'Edit FAQ search logs'
+            'FAQ_VIEW_SEARCH_LOGS' => array(
+                'name' => _t(
+                    'Faq.ViewSeachLogsLabel',
+                    'View FAQ search logs'
+                ),
+                'category' => _t(
+                    'Faq.Category',
+                    'FAQ'
+                ),
+            ),
+            'FAQ_EDIT_SEARCH_LOGS' => array(
+                'name' => _t(
+                    'Faq.EditSearchLogsLable',
+                    'Edit FAQ search logs'
+                ),
+                'category' => _t(
+                    'Faq.Category',
+                    'FAQ'
+                ),
+            )
         );
     }
 }

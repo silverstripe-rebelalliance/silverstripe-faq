@@ -67,6 +67,15 @@ Permission:
    admin:
     Code: ADMIN
     GroupID: =>Group.admin
+  editFAQs:
+    Code: FAQ_EDIT
+    GroupID: =>Group.contentAuthors
+  deleteFAQs:
+    Code: FAQ_DELETE
+    GroupID: =>Group.contentAuthors
+  createFAQs:
+    Code: FAQ_CREATE
+    GroupID: =>Group.contentAuthors
   viewLogs:
     Code: FAQ_VIEW_SEARCH_LOGS
     GroupID: =>Group.contentAuthors
