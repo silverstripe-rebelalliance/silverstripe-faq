@@ -19,7 +19,7 @@ class FAQ extends DataObject
 
     private static $summary_fields = array(
         'Question' => 'Question',
-        'Answer.Summary' => 'Answer',
+        'Answer.FirstSentence' => 'Answer',
         'Category.Name' => 'Category'
     );
 
@@ -50,6 +50,32 @@ class FAQ extends DataObject
      * @config
      */
     private static $taxonomy_name = 'FAQ Categories';
+
+    /**
+     * Creates a custom FAQSearch search object, can override to prevent the field removals
+     *
+     * @return FAQSearch_SearchContext
+     */
+    public function getDefaultSearchContext()
+    {
+        $fields = $this->scaffoldSearchFields();
+        $filters = $this->defaultSearchFilters();
+
+        $fields->removeByName('Category');
+        $categories = self::getRootCategory()->Children()->map('Name');
+        $fields->push(
+            DropdownField::create('Category__Name', 'Category Name', $categories)
+            ->setEmptyString('(Any)')
+        );
+
+        $filters['Category.Name'] = ExactMatchFilter::create('Category.Name');
+
+        return new SearchContext(
+            $this->class,
+            $fields,
+            $filters
+        );
+    }
 
     /**
      *
