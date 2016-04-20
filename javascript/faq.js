@@ -15,6 +15,7 @@
             var $useful = $usefuls.filter(':checked');
 
             if ($useful.val() === 'Y') {
+                $comment.find(':input').val('');
                 $comment.hide();
             }
             else {
