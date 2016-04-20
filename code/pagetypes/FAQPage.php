@@ -245,6 +245,13 @@ class FAQPage_Controller extends Page_Controller
         )
     );
 
+    public function init()
+    {
+        parent::init();
+
+        Requirements::javascript(FAQ_DIR .'/javascript/faq.js');
+    }
+
     /**
      * Start a session by setting a dummy property. Sessions are essential for linking behaviour to a user.
      */
@@ -256,7 +263,7 @@ class FAQPage_Controller extends Page_Controller
         }
     }
 
-    /*
+    /**
     * Renders the base search page if no search term is present.
     * Otherwise runs a search and renders the search results page.
     * Search action taken from FAQPage.php and modified.
@@ -736,7 +743,8 @@ class FAQPage_Controller extends Page_Controller
             'RatingForm',
             $fields,
             $actions
-        );
+        )
+            ->addExtraClass('faq__rating');
         return $form;
     }
 
