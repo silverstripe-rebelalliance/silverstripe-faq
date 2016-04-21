@@ -750,8 +750,10 @@ class FAQPage_Controller extends Page_Controller
             'RatingForm',
             $fields,
             $actions
-        )
-            ->addExtraClass('faq__rating');
+        )->addExtraClass('faq__rating');
+
+        $this->extend('updateRatingForm', $form);
+
         return $form;
     }
 
