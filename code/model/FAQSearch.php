@@ -28,6 +28,8 @@ class FAQSearch extends DataObject implements PermissionProvider
         'Articles' => 'FAQResults_Article'
     );
 
+    private static $default_sort = '"Created" DESC';
+
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
