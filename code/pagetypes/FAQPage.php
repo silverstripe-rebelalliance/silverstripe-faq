@@ -766,6 +766,7 @@ class FAQPage_Controller extends Page_Controller
     public function rate(Array $data, Form $form, SS_HTTPRequest $request) {
 
         // If the session and matches for the article log, then add rating/comment
+        $updated = false;
         $articleLogID = (int) $data['ID'];
         $sessID = session_id();
         if ($sessID && $articleLogID) {
@@ -775,11 +776,18 @@ class FAQPage_Controller extends Page_Controller
             ))->first();
 
             if ($articleLog && $articleLog->exists()) {
-                $articleLog->update(array(
+                $updated = $articleLog->update(array(
                     'Comment' => $data['Comment'],
                     'Useful' => $data['Useful']
                 ))->write();
+
+                if ($updated) {
+                    $form->sessionMessage('Thank you for your feedback.', 'good');
+                }
             }
+        }
+        if (!$updated) {
+            $form->sessionMessage('Sorry, your feedback could not be submitted.', 'bad');
         }
 
         if (!Director::is_ajax()) {
