@@ -295,6 +295,7 @@ class FAQPage_Controller extends Page_Controller
         // Record the view of an article, linked to search query and results
         $sessID = session_id();
         $ratingForm = null;
+        $query = null;
 
         if ($sessID && $request->getVar('t')) {
             $trackingIDs = $this->getTrackingIDs($request->getVar('t'));
@@ -323,6 +324,8 @@ class FAQPage_Controller extends Page_Controller
                     ));
                     $articleLog->write();
                 }
+            } else {
+                $searchLog = $articleLog->Search();
             }
 
             // Only generate the rating form if article log exists
@@ -330,11 +333,15 @@ class FAQPage_Controller extends Page_Controller
                 $ratingForm = $this->RatingForm();
                 $ratingForm->loadDataFrom($articleLog);
             }
+            if ($searchLog && $searchLog->exists()) {
+                $query = $searchLog->Term;
+            }
         }
 
         return array(
             'FAQ' => $faq,
-            'FAQRatingForm' => $ratingForm
+            'FAQRatingForm' => $ratingForm,
+            'Query' => $query
         );
     }
 
