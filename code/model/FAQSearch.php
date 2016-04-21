@@ -177,22 +177,22 @@ class FAQSearch_SearchContext extends SearchContext
         parent::__construct($modelClass, $fields, $filters);
 
         // add before filter
-        $date = new DateField('CreatedBefore', 'Created before (inclusive)');
+        $date = new DateField('CreatedBefore', 'Created before');
         $date->setRightTitle('e.g. ' . date('Y-m-d'));
         $date->setAttribute('placeholder', 'yyyy-mm-dd');
 
-        $dateFilter = new LessThanOrEqualFilter('CreatedBefore');
+        $dateFilter = new LessThanFilter('CreatedBefore');
         $dateFilter->setName('Created');
 
         $this->addField($date);
         $this->addFilter($dateFilter);
 
         // add after filter
-        $date = new DateField('CreatedAfter', 'Created after');
+        $date = new DateField('CreatedAfter', 'Created after (inclusive)');
         $date->setRightTitle('e.g. ' . date('Y-m-d'));
         $date->setAttribute('placeholder', 'yyyy-mm-dd');
 
-        $dateFilter = new GreaterThanFilter('CreatedAfter');
+        $dateFilter = new GreaterThanOrEqualFilter('CreatedAfter');
         $dateFilter->setName('Created');
 
         $this->addField($date);
