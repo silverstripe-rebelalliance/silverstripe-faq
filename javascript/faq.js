@@ -7,23 +7,23 @@
         var $form = $('.faq__rating'),
             $usefuls = $form.find('input[name="Useful"]'),
             $comment = $form.find('#Comment'),
-            $actions = $form.find('.Actions');
+            $actions = $form.find('.Actions')
+            existingComment = null;
 
-        if ($comment.find(':input').val()) {
-            $comment.hide();
-        }
-        $actions.hide();
         $form.on('change', function () {
             var $useful = $usefuls.filter(':checked');
 
             if ($useful.val() === 'Y') {
+                existingComment = $comment.find(':input').val();
                 $comment.find(':input').val('');
                 $comment.hide();
             }
             else {
+                if (existingComment) {
+                    $comment.find(':input').val(existingComment);
+                }
                 $comment.show();
             }
-            $actions.show();
-        });
+        }).change();
     });
 }(jQuery));
