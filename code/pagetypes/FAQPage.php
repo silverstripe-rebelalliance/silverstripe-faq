@@ -501,16 +501,24 @@ class FAQPage_Controller extends Page_Controller
      */
     public function doSearch($query, $start, $limit)
     {
-        $result = singleton(self::$search_index_class)->search(
-            $query,
-            $start,
-            $limit,
-            array(
+        $params = array(
             'defType' => 'edismax',
             'hl' => 'true',
             'spellcheck' => 'true',
             'spellcheck.collate' => 'true'
-            )
+        );
+
+        // add optional dictionary
+        if($searchParams = Config::inst()->get('FAQSearchIndex', 'search_params')) {
+            $params = array_merge($params, $searchParams);
+            //$params["spellcheck.dictionary"] = $dictionary;
+        }
+
+        $result = singleton(self::$search_index_class)->search(
+            $query,
+            $start,
+            $limit,
+            $params
         );
 
         return $result;

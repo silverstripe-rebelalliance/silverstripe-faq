@@ -165,6 +165,13 @@ class FAQSearchIndex extends SolrIndex
         $this->extend('updateConfig', $store);
     }
 
+    public function getFieldDefinitions() {
+        $xml = parent::getFieldDefinitions();
+
+        $this->extend('updateFieldDefinitions', $xml);
+
+        return $xml;
+    }
 }
 
 /**
