@@ -152,6 +152,17 @@ class FAQSearchIndex extends SolrIndex
         }
         return $q;
     }
+    /**
+     * Upload config for this index to the given store
+     *
+     * @param SolrConfigStore $store
+     */
+    public function uploadConfig($store) {
+        parent::uploadConfig($store);
+
+        $this->extend('updateConfig', $store);
+    }
+
 }
 
 /**
