@@ -13,6 +13,8 @@ and has its own file for stopwords and synonyms.
 ## Requirements
 
  * [Fulltextsearch module](https://github.com/silverstripe-labs/silverstripe-fulltextsearch), v2.1.0 or up.
+ * [Phockito](https://github.com/hafriedlander/silverstripe-phockito) and
+ PHPunit for testing, not required if you don't care about running tests.
 
 ## Installation
 

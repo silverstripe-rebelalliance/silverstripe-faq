@@ -1,6 +1,6 @@
 {
     "name": "d-rivera-c/silverstripe-faq",
-    "description": "Provides Q & A pages and search",
+    "description": "Provides Q&A pages and Solr-based search",
     "type": "silverstripe-module",
     "homepage": "https://code.platform.silverstripe.com/supervillains/silverstripe-faq",
     "keywords": ["silverstripe", "search", "faq", "solr"],
@@ -24,7 +24,11 @@
 		"silverstripe/taxonomy": "^1.0"
     },
     "require-dev": {
-        "silverstripe/fulltextsearch-localsolr": "dev-master"
+		"phpunit/phpunit": "3.7.*@stable",
+        "hafriedlander/phockito": "dev-master"
+    },
+    "suggest": {
+        "silverstripe/fulltextsearch-localsolr": "For local testing of Solr"
     },
 	"extra": {
 		"installer-name": "faq"
