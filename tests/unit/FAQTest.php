@@ -1,5 +1,4 @@
 <?php
-
 /**
  * FAQ Module Unit Tests
  */
@@ -7,6 +6,7 @@ class FAQTest extends SapphireTest {
 	
 	/**
 	 * Link() functionality, returns a link to view the detail page for FAQ
+	 * @see FAQ::getLink
 	 */
 	public function testLink() {
 		// no controller or object created, shouldn't get a link
@@ -22,7 +22,7 @@ class FAQTest extends SapphireTest {
 	
 	/**
 	 * Should always get a root category
-	 * {@see FAQ::getRootCategory}
+	 * @see FAQ::getRootCategory
 	 */
 	public function testGetRootCategory() {
 		// get root we assume is set by config

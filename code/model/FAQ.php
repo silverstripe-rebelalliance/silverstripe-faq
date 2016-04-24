@@ -1,8 +1,8 @@
 <?php
-
 /**
  * DataObject for a single FAQ related to the FAQ search module.
  * Provides db fields for a question and an answer.
+ *
  * @see FAQAdmin for FAQ ModelAdmin.
  */
 class FAQ extends DataObject {
@@ -23,35 +23,38 @@ class FAQ extends DataObject {
 	);
 
 	/**
-	 * Search boost defaults for fields.
-	 *
+	 * Search boost for questions.
 	 * @config
-	 * @var config
-	 * @string 
 	 */
 	private static $question_boost = '3';
-	
+
 	/**
+	 * Search boost for answer
 	 * @config
 	 */
 	private static $answer_boost = '1';
-	
+
 	/**
+	 * Search boost for keywords
 	 * @config
 	 */
 	private static $keywords_boost = '4';
-	
+
 	/**
+	 * Name of the taxonomy to use for categories
 	 * @config
 	 */
 	private static $taxonomy_name = 'FAQ Categories';
 	
 	/**
+	 * Add fields to manage FAQs.
 	 *
+	 * @return $fields
 	 */
 	public function getCMSFields() {
 		$fields = parent::getCMSFields();
-		
+		$this->extend('beforeGetCMSFields', $fields);
+
 		// setup category dropdown field
 		$taxonomyRoot = self::getRootCategory();
 		$categoryField = new TreeDropdownField(
@@ -68,11 +71,15 @@ class FAQ extends DataObject {
 					. 'FAQ Category</a>',
 					$taxonomyRoot->ID));
 		$fields->addFieldToTab('Root.Main', $categoryField);
+		
+		$this->extend('updateGetCMSFields', $fields);
 		return $fields;
 	}
-	
+
 	/**
 	 * Set required fields for model form submission.
+	 *
+	 * @return RequiredFields
 	 */
 	public function getCMSValidator() {
 		return new RequiredFields('Question', 'Answer');
@@ -87,45 +94,38 @@ class FAQ extends DataObject {
 	 * @return Boolean
 	 */
 	public function canView($member = null) {
-		return true;
+		$canView = true;
+		$this->extend('updateCanView', $member, $canView);
+		return $canView;
 	}
 
 	/**
 	 * Gets a link to the view page for each FAQ
+	 * 
 	 * @return string Link to view this particular FAQ on the current FAQPage.
 	 */
 	public function getLink() {
 		$faqPage = Controller::curr();
 
-		if ($faqPage->exists() && $this->ID != 0) {
-			return Controller::join_links(
-				$faqPage->Link(),
-				"view/",
-				$this->ID
-			);
+		if (!$faqPage->exists() || $this->ID <= 0) {
+			return '';
 		}
-		
-		return '';
+
+		$this->extend('updateGetLink', $faqPage);
+		return Controller::join_links(
+			$faqPage->Link(),
+			"view/",
+			$this->ID
+		);
 	}
 
-	/**
-	 * @return string "Read more" link text for the current FAQPage.
-	 */
-	public function getMoreLinkText() {
-		$faqPage = Controller::curr();
-
-		if ($faqPage->exists() && $faqPage->ClassName === 'FAQPage') {
-			return $faqPage->MoreLinkText;
-		}
-		
-		return '';
-	}
-	
 	/**
 	 * Gets all nested categories for FAQs
-	 * TODO: this, if it's required by SUP-75 or SUP-76, if not, delete
+	 *
+	 * @return ArrayList
 	 */
 	public static function getAllCategories() {
+		Deprecation::notice('2.0', 'getAllCategories is deprecated. Create extended function');
 		$taxName = Config::inst()->get('FAQ', 'taxonomy_name');
 		$root = FAQTaxonomyTermExtension::getOrCreate(array('Name'=> $taxName),
 										  array('Name'=> $taxName, 'ParentID'=> 0));
@@ -135,6 +135,8 @@ class FAQ extends DataObject {
 	/**
 	 * Gets the root category for the FAQs
 	 * If it doesn't find it it creates it
+	 *
+	 * @return null|TaxonomyTerm root category of FAQs
 	 */
 	public static function getRootCategory() {
 		$taxName = Config::inst()->get('FAQ', 'taxonomy_name');

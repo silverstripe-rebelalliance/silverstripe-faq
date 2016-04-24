@@ -1,4 +1,10 @@
 # FAQ
+[![Build Status](https://api.travis-ci.org/d-rivera-c/silverstripe-faq.svg?branch=master.png)](https://travis-ci.org/d-rivera-c/silverstripe-faq)
+[![Latest Stable Version](https://poser.pugx.org/d-rivera-c/silverstripe-faq/version.svg)](https://github.com/d-rivera-c/silverstripe-faq/releases)
+[![Total Downloads](https://poser.pugx.org/d-rivera-c/silverstripe-faq/downloads.svg)](https://packagist.org/packages/d-rivera-c/silverstripe-faq)
+[![License](https://poser.pugx.org/d-rivera-c/silverstripe-faq/license.svg)](https://github.com/d-rivera-c/silverstripe-faq/blob/master/LICENSE.md)
+[![Dependency Status](https://www.versioneye.com/php/d-rivera-c:silverstripe-faq/badge.svg)](https://www.versioneye.com/php/d-rivera-c:silverstripe-faq)
+[![Reference Status](https://www.versioneye.com/php/d-rivera-c:silverstripe-faq/reference_badge.svg)](https://www.versioneye.com/php/d-rivera-c:silverstripe-faq/references)
 
 ## Introduction
 
@@ -60,4 +66,4 @@ Check how to configure this module to behave like CWP-Solr [on the docs](docs/en
 
 - Get static config variables from yml files for controller
 - Pagetypes, search index and dataobjects easily extendable
-- make this a supported SS module
+- version FAQs (?)

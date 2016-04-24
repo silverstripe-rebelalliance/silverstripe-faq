@@ -5,7 +5,7 @@
 FAQ module comes with a default set of templates to start the Solr index. If you want to override the path from where this files
 come from, you need to add a YAML file like this.
 
-```
+```yaml
 ---
 Name: faqoverride
 After: 'faq/*'

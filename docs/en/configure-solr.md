@@ -4,7 +4,7 @@ so you only need to worry about [adding a few tweaks](cwp.md).
 We assume that if you are using this module, you already have Solr configured an running,
 but if you need help getting started with configuration, here is some starting code to get you started.
 
-````
+```php
 /**
  * Configure Solr.
  */
@@ -30,7 +30,7 @@ $solrOptions = array(
 		);
 
 Solr::configure_server($solrOptions);
-````
+```
 
 This code would go on `mysite/_config.php`.
 

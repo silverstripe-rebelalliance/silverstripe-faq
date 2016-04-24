@@ -21,7 +21,7 @@ feature).
 
 You need to add this code to your `config.yml`
 
-```
+```yaml
 FAQSearchIndex:
   copy_fields:
     - _text
@@ -33,7 +33,7 @@ Then run a `flush=1`.
 Now change `solrconfig.xml` in the `conf` folder (one comes with the module, but if you are going to modify the file,
 copy the `conf` folder into your project and change the path as noted in the configuration instructions) from this
 
-```
+```xml
 <lst name="spellchecker">
 	<str name="name">default</str>
 	<str name="field">_text</str>
@@ -41,7 +41,7 @@ copy the `conf` folder into your project and change the path as noted in the con
 
 to
 
-```
+```xml
 <lst name="spellchecker">
 	<str name="name">default</str>
 	<str name="field">_spellcheckText</str>
@@ -49,13 +49,13 @@ to
 
 And in the same folder (`conf`), locate `schema.ss` and add
 
-```
+```xml
 <field name='_spellcheckText' type='textSpellHtml' indexed='true' stored='false' multiValued='true' />
 ```
 
 It will end with something like this
 
-```
+```xml
 <fields>
 	$FieldDefinitions
 

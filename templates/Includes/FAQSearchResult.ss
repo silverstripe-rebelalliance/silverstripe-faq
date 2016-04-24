@@ -4,5 +4,5 @@
         $Answer.RichLinks.LimitCharacters(80)
     </p>
     <% if $Category %><div>Category: <em>$Category.Name</em></div><% end_if %>
-    <a href="$Link">$MoreLinkText</a>
+    <a href="$Link">$Top.MoreLinkText</a>
 </div>
