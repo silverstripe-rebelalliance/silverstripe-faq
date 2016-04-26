@@ -28,7 +28,7 @@ class FAQCsvBulkLoader extends CsvBulkLoader
     public function formatAnswer(&$obj, $val, $record)
     {
         // is this already html?
-        if (preg_match("/<[^<a-zA-Z]+>/", $val) === 1 ) {
+        if (preg_match("/<[a-z][\\s\\S]*>/", $val) === 1 ) {
             $answer = $val;
         }
         else {
