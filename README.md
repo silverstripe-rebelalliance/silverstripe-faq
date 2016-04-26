@@ -22,7 +22,7 @@ Edit your project-wide composer.json file as follows; in the "require" block add
 Then in the root of your project run:
 
     #> composer update silverstripe/faq
-	
+
 Or just
 
     composer install silverstripe/faq
@@ -33,7 +33,7 @@ columns and tables for the module to function.
 
 ### Configuring Solr
 The module assumes you already have Solr installed and configured. If using CWP, then it will be configured for you.
-We assume that if you are using this module, you already have Solr configured an running, but if you need help getting started with configuration,
+We assume that if you are using this module, you already have Solr configured and running, but if you need help getting started with configuration,
 here is some starting code for configuring Solr
 
 ````
@@ -66,7 +66,7 @@ Solr::configure_server($solrOptions);
 
 
 This code would go on `mysite/_config.php`.
- 
+
 ### Using CWP
 
 If your using the module with CWP, extra requirements should be noticed (even if not required on composer for this project)
@@ -111,7 +111,7 @@ FAQSearchIndex:
   options:
     extraspath: 'new/path/to/extrapath'
     templatespath: 'new/path/to/template'
-	
+
 FAQ:
   question_boost: '3'
   answer_boost: '1'
