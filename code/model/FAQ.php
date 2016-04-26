@@ -121,7 +121,7 @@ class FAQ extends DataObject implements PermissionProvider
      */
     public function getLink()
     {
-        $faqPage = Controller::curr();
+        $faqPage = FAQPage::get()->first();
         $link = '';
 
         if ($faqPage->exists() && $this->ID != 0) {
