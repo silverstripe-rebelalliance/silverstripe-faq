@@ -259,6 +259,7 @@ class FAQPage_Controller extends Page_Controller
         if (!Session::get('FAQPage')) {
             // Ensure that session is started for tracking behaviour, essential for linking behaviour to a user
             Session::set('FAQPage', true);
+            Session::save();
         }
     }
 
@@ -387,16 +388,26 @@ class FAQPage_Controller extends Page_Controller
                     ))->first();
                     $searchLogID = ($searchLog && $searchLog->exists()) ? $searchLog->ID : null;
                 } else {
-                    $referrer = Controller::curr()->data();
 
-                    $searchLogID = FAQSearch::create(array(
+                    $searchLog = FAQSearch::create(array(
                         'SessionID' => $sessID,
                         'Term' => $keywords,
-                        'TotalResults' => $results->getTotalItems(),
-                        'ReferrerID' => $referrer->ID,
-                        'ReferrerType' => $referrer->ClassName,
-                        'ReferrerURL' => $referrer->Link()
-                    ))->write();
+                        'TotalResults' => $results->getTotalItems()
+                    ));
+
+                    // Optionally save some referrer data
+                    $controller = Controller::curr();
+                    if ($controller instanceof ContentController) {
+                        $referrer = Controller::curr()->data();
+                        if ($referrer && $referrer->exists()) {
+                            $searchLog->update(array(
+                                'ReferrerID' => $referrer->ID,
+                                'ReferrerType' => $referrer->ClassName,
+                                'ReferrerURL' => $referrer->Link()
+                            ));
+                        }
+                    }
+                    $searchLogID = $searchLog->write();
                 }
 
                 // A valid search log ID exists for this session, a new results set log
