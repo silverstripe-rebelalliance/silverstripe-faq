@@ -10,7 +10,10 @@ class FAQSearch extends DataObject implements PermissionProvider
         'Term' => 'Varchar(255)',
         'SessionID' => 'Varchar(255)',
         'TotalResults' => 'Int',
-        'Archived' => 'Boolean'
+        'Archived' => 'Boolean',
+        'ReferrerID' => 'Int',
+        'ReferrerType' => 'Varchar(255)',
+        'ReferrerURL' => 'Varchar(255)'
     );
 
     private static $summary_fields = array(
@@ -35,7 +38,13 @@ class FAQSearch extends DataObject implements PermissionProvider
         $fields = parent::getCMSFields();
 
         $fields->removeByName('SessionID');
-        $fields->removeFieldsFromTab('Root', array('Results', 'Articles'));
+        $fields->removeFieldsFromTab('Root', array(
+            'Results',
+            'Articles',
+            'ReferrerID',
+            'ReferrerType',
+            'ReferrerURL'
+        ));
 
         $fields->addFieldsToTab('Root.Main', array(
             ReadonlyField::create('Term', 'Search term'),

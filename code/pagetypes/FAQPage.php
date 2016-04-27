@@ -248,7 +248,6 @@ class FAQPage_Controller extends Page_Controller
     public function init()
     {
         parent::init();
-
         Requirements::javascript(FAQ_DIR .'/javascript/faq.js');
     }
 
@@ -264,10 +263,10 @@ class FAQPage_Controller extends Page_Controller
     }
 
     /**
-    * Renders the base search page if no search term is present.
-    * Otherwise runs a search and renders the search results page.
-    * Search action taken from FAQPage.php and modified.
-    */
+     * Renders the base search page if no search term is present.
+     * Otherwise runs a search and renders the search results page.
+     * Search action taken from FAQPage.php and modified.
+     */
     public function index()
     {
         $this->startSession();
@@ -345,7 +344,6 @@ class FAQPage_Controller extends Page_Controller
         );
     }
 
-
     /**
      * Search function. Called from index() if we have a search term. Record the
      * search if session exists.
@@ -389,10 +387,15 @@ class FAQPage_Controller extends Page_Controller
                     ))->first();
                     $searchLogID = ($searchLog && $searchLog->exists()) ? $searchLog->ID : null;
                 } else {
+                    $referrer = Controller::curr()->data();
+
                     $searchLogID = FAQSearch::create(array(
                         'SessionID' => $sessID,
                         'Term' => $keywords,
-                        'TotalResults' => $results->getTotalItems()
+                        'TotalResults' => $results->getTotalItems(),
+                        'ReferrerID' => $referrer->ID,
+                        'ReferrerType' => $referrer->ClassName,
+                        'ReferrerURL' => $referrer->Link()
                     ))->write();
                 }
 
