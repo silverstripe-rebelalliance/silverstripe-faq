@@ -18,6 +18,24 @@ class FAQResults_Extension extends Extension
         'Search' => 'FAQSearch'
     );
 
+    /**
+     * Helper for pretty printing useful value.
+     *
+     * @return string
+     */
+    public function getUsefulness()
+    {
+        switch ($this->owner->Useful) {
+            case 'Y':
+                return 'Yes';
+            case 'N':
+                return 'No';
+            case 'U':
+            default:
+                return '';
+        }
+    }
+
     public function canView($member = false)
     {
         return Permission::check('FAQ_VIEW_SEARCH_LOGS');
@@ -56,31 +74,95 @@ class FAQResults extends DataObject
     );
 
     private static $summary_fields = array(
-        'Created.Nice' => 'Date',
-        'ArticleSet' => 'Articles',
-        'SetSize' => 'Total'
+        'getArticlesViewedIDs' => 'Articles viewed',
+        'Created.Nice' => 'Date viewed',
+        'getArticleIDs' => 'Articles displayed in results',
+        'SetSize' => 'Total displayed'
     );
+
+    /**
+     * Get IDs of articles in this set
+     *
+     * @return string Comma separated list of IDs
+     */
+    public function getArticleIDs()
+    {
+        return trim($this->ArticleSet, '[]');
+    }
+
+    /**
+     * Get articles that were actually viewed from this set.
+     *
+     * @return string Comma separated list of IDs
+     */
+    public function getArticlesViewedIDs()
+    {
+        $ids = 'None viewed';
+        $views = $this->ArticlesViewed();
+        if ($views && $views->exists()) {
+            $ids = implode(array_keys($views->map('FAQID')->toArray()), ',');
+        }
+        return $ids;
+    }
 
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
 
         $fields->removeByName(array('ArticleSet', 'SessionID', 'SearchID', 'Useful', 'Comment', 'Archived'));
+        $fields->removeFieldFromTab('Root', 'ArticlesViewed');
 
+        // Get FAQs listed, the 'FIELD(ID,{IDs})' ensures they appear in the order provided
         $articleIDs = json_decode($this->ArticleSet);
-        // get FAQs listed, the 'FIELD(ID,{IDs})' ensures they appear in the order provided
-        $articles = DataObject::get('FAQ', 'ID IN (' . implode(',', $articleIDs) . ')', 'FIELD(ID,' . implode(',', $articleIDs) .')');
-        $articleSet = GridField::create('FAQ', 'Article Set', $articles, GridFieldConfig_RecordViewer::create());
+        $articles = FAQ::get()
+            ->where('ID IN (' . implode(',', $articleIDs) . ')')
+            ->sort('FIELD(ID,' . implode(',', $articleIDs) .')');
 
         $fields->addFieldsToTab('Root.Main', array(
             ReadonlyField::create('SetSize', 'Size of this results set'),
-            $articleSet
+            GridField::create(
+                'FAQ',
+                'Article Set',
+                $articles,
+                $configOne = GridFieldConfig::create()
+            ),
+            GridField::create(
+                'Articles',
+                'Articles viewed',
+                $this->ArticlesViewed(),
+                $configTwo = GridFieldConfig::create()
+            )
         ));
 
-        $config = $fields->dataFieldByName('ArticlesViewed')->getConfig();
-        $config->removeComponentsByType('GridFieldDeleteAction');
-        $config->removeComponentsByType('GridFieldAddExistingAutocompleter');
-        $config->removeComponentsByType('GridFieldAddNewButton');
+        $sort = new GridFieldSortableHeader();
+        $sort->setThrowExceptionOnBadDataType(false);
+
+        $columns = new GridFieldDataColumns();
+        $columns->setDisplayFields(array(
+            'ID' => 'ID',
+            'Question' => 'Question',
+            'Answer.FirstSentence' => 'Answer'
+        ));
+
+        $configOne->addComponents(
+            new GridFieldButtonRow('before'),
+            new GridFieldToolbarHeader(),
+            $sort,
+            $columns,
+            new GridFieldEditButton(),
+            new GridFieldDetailForm(),
+            new GridFieldFooter()
+        );
+
+        $configTwo->addComponents(
+            new GridFieldButtonRow('before'),
+            new GridFieldToolbarHeader(),
+            $sort,
+            new GridFieldDataColumns(),
+            new FAQResults_Article_EditButton(),
+            new FAQResults_Article_DetailForm(),
+            new GridFieldFooter()
+        );
 
         return $fields;
     }
@@ -99,10 +181,10 @@ class FAQResults_Article extends DataObject
     );
 
     private static $summary_fields = array(
-        'Created.Nice' => 'Date',
         'FAQ.ID' => 'Article ID',
-        'FAQ.Question' => 'Article',
-        'Useful' => 'Useful',
+        'Created.Nice' => 'Date viewed',
+        'FAQ.Question' => 'Question',
+        'getUsefulness' => 'Usefulness Rating',
         'Comment' => 'Comment'
     );
 
@@ -127,4 +209,117 @@ class FAQResults_Article extends DataObject
     }
 }
 
+/**
+ * Gridfield edit button to open FAQ when gridfield list consists of FAQResults_Article items.
+ */
+class FAQResults_Article_EditButton extends GridFieldEditButton
+{
+    public function getColumnContent($gridField, $record, $columnName)
+    {
+        $faq = FAQ::get()->byID($record->FAQID);
+
+        if ($faq && $faq->exists()) {
+            $data = new ArrayData(array(
+                'Link' => Controller::join_links($gridField->Link('item'), $record->FAQID, 'edit')
+            ));
+            return $data->renderWith('GridFieldEditButton');
+        }
+    }
+}
+
+/**
+ * Gridfield detail form for handing FAQ items when linked to from a list of FAQResults_Article items.
+ */
+class FAQResults_Article_DetailForm extends GridFieldDetailForm
+{
+    public function handleItem($gridField, $request)
+    {
+        // Our getController could either give us a true Controller, if this is the top-level GridField.
+        // It could also give us a RequestHandler in the form of GridFieldDetailForm_ItemRequest if this is a
+        // nested GridField.
+        $requestHandler = $gridField->getForm()->getController();
+
+        $record = FAQ::get()->byID($request->param("ID"));
+
+        $class = $this->getItemRequestClass();
+
+        $handler = Object::create($class, $gridField, $this, $record, $requestHandler, $this->name);
+        $handler->setTemplate($this->template);
+
+        // if no validator has been set on the GridField and the record has a
+        // CMS validator, use that.
+        if(!$this->getValidator() && (method_exists($record, 'getCMSValidator') || $record instanceof Object && $record->hasMethod('getCMSValidator'))) {
+            $this->setValidator($record->getCMSValidator());
+        }
+
+        return $handler->handleRequest($request, DataModel::inst());
+    }
+}
+
+/**
+ * Saving FAQ records from FAQResults_Article_DetailForm.
+ */
+class FAQResults_Article_DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
+{
+    public function doSave($data, $form)
+    {
+        $new_record = $this->record->ID == 0;
+        $controller = $this->getToplevelController();
+        $list = $this->gridField->getList();
+
+        if(!$this->record->canEdit()) {
+            return $controller->httpError(403);
+        }
+
+        if (isset($data['ClassName']) && $data['ClassName'] != $this->record->ClassName) {
+            $newClassName = $data['ClassName'];
+            // The records originally saved attribute was overwritten by $form->saveInto($record) before.
+            // This is necessary for newClassInstance() to work as expected, and trigger change detection
+            // on the ClassName attribute
+            $this->record->setClassName($this->record->ClassName);
+            // Replace $record with a new instance
+            $this->record = $this->record->newClassInstance($newClassName);
+        }
+
+        try {
+            $form->saveInto($this->record);
+            $this->record->write();
+
+        } catch(ValidationException $e) {
+            $form->sessionMessage($e->getResult()->message(), 'bad', false);
+            $responseNegotiator = new PjaxResponseNegotiator(array(
+                'CurrentForm' => function() use(&$form) {
+                    return $form->forTemplate();
+                },
+                'default' => function() use(&$controller) {
+                    return $controller->redirectBack();
+                }
+            ));
+            if($controller->getRequest()->isAjax()){
+                $controller->getRequest()->addHeader('X-Pjax', 'CurrentForm');
+            }
+            return $responseNegotiator->respond($controller->getRequest());
+        }
+
+        $link = '<a href="' . $this->Link('edit') . '">"'
+            . htmlspecialchars($this->record->Title, ENT_QUOTES)
+            . '"</a>';
+        $message = _t(
+            'GridFieldDetailForm.Saved',
+            'Saved {name} {link}',
+            array(
+                'name' => $this->record->i18n_singular_name(),
+                'link' => $link
+            )
+        );
+
+        $form->sessionMessage($message, 'good', false);
+
+        if($new_record) {
+            return $controller->redirect($this->Link());
+        } else {
+            return $this->edit($controller->getRequest());
+        }
+    }
+}
 
