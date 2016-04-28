@@ -208,8 +208,8 @@ class FAQSearch_SearchContext extends SearchContext
         $this->addFilter($dateFilter);
 
         // filter based on what articles were rated
-        $usefulObject = singleton('FAQResults_Article')->dbObject('Useful');
-        $useful = new DropdownField('Useful', 'Usefulness rated articles', $usefulObject->enumValues());
+        $usefulOptions = array('Y' => 'Yes', 'N' => 'No', 'U' => 'Unrated');
+        $useful = new DropdownField('Useful', 'How articles were rated in search', $usefulOptions);
         $useful->setEmptyString('Any');
 
         $this->addField($useful);
