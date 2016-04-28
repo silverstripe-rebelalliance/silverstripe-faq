@@ -145,6 +145,13 @@ class FAQ extends DataObject implements PermissionProvider
         return $link;
     }
 
+    public function getTitle() {
+        if ($this->Question) {
+            return $this->Question;
+        }
+        return parent::getTitle();
+    }
+
     /**
      * @return string "Read more" link text for the current FAQPage.
      */
