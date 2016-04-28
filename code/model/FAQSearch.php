@@ -153,7 +153,7 @@ class FAQSearch extends DataObject implements PermissionProvider
         return array(
             'FAQ_VIEW_SEARCH_LOGS' => array(
                 'name' => _t(
-                    'Faq.ViewSeachLogsLabel',
+                    'Faq.ViewSearchLogsLabel',
                     'View FAQ search logs'
                 ),
                 'category' => _t(
@@ -163,7 +163,7 @@ class FAQSearch extends DataObject implements PermissionProvider
             ),
             'FAQ_EDIT_SEARCH_LOGS' => array(
                 'name' => _t(
-                    'Faq.EditSearchLogsLable',
+                    'Faq.EditSearchLogsLabel',
                     'Edit FAQ search logs'
                 ),
                 'category' => _t(
