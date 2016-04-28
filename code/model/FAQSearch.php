@@ -59,9 +59,23 @@ class FAQSearch extends DataObject implements PermissionProvider
                 'Articles',
                 'Articles viewed',
                 $this->Articles(),
-                GridFieldConfig_RecordEditor::create()
+                $config = GridFieldConfig::create()
             )
         ));
+
+        $sort = new GridFieldSortableHeader();
+        $sort->setThrowExceptionOnBadDataType(false);
+
+        $config->addComponents(
+            new GridFieldButtonRow('before'),
+            new GridFieldToolbarHeader(),
+            $sort,
+            new GridFieldDataColumns(),
+            new FAQResults_Article_EditButton(),
+            new FAQResults_Article_DetailForm(),
+            new GridFieldFooter()
+        );
+
         return $fields;
     }
 
