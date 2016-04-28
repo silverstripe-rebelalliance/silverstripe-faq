@@ -124,13 +124,13 @@ class FAQResults extends DataObject
                 'FAQ',
                 'Article Set',
                 $articles,
-                $configOne = GridFieldConfig::create()
+                $configSet = GridFieldConfig::create()
             ),
             GridField::create(
                 'Articles',
                 'Articles viewed',
                 $this->ArticlesViewed(),
-                $configTwo = GridFieldConfig::create()
+                $configView = GridFieldConfig::create()
             )
         ));
 
@@ -144,7 +144,7 @@ class FAQResults extends DataObject
             'Answer.FirstSentence' => 'Answer'
         ));
 
-        $configOne->addComponents(
+        $configSet->addComponents(
             new GridFieldButtonRow('before'),
             new GridFieldToolbarHeader(),
             $sort,
@@ -154,7 +154,7 @@ class FAQResults extends DataObject
             new GridFieldFooter()
         );
 
-        $configTwo->addComponents(
+        $configView->addComponents(
             new GridFieldButtonRow('before'),
             new GridFieldToolbarHeader(),
             $sort,
