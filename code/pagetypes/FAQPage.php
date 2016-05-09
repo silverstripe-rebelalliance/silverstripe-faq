@@ -370,6 +370,7 @@ class FAQPage_Controller extends Page_Controller
 
         // get search query
         $query = $this->getSearchQuery($keywords);
+
         try {
             $searchResult = $this->doSearch($query, $start, $limit);
             $results = $searchResult->Matches;
@@ -399,7 +400,7 @@ class FAQPage_Controller extends Page_Controller
                     $controller = Controller::curr();
                     if ($controller instanceof ContentController) {
                         $referrer = Controller::curr()->data();
-                        if ($referrer && $referrer->exists()) {
+                        if ($referrer) {
                             $searchLog->update(array(
                                 'ReferrerID' => $referrer->ID,
                                 'ReferrerType' => $referrer->ClassName,
@@ -431,7 +432,6 @@ class FAQPage_Controller extends Page_Controller
                 // Append partial tracking code to each pagination link
                 $results->setTrackingURL($this->request, $searchLogID . '_');
             }
-
 
             // if the suggested query has a trailing '?' then hide the hardcoded one from 'Did you mean <Suggestion>?'
             $showTrailingQuestionmark = !preg_match('/\?$/', $searchResult->Suggestion);
