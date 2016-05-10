@@ -48,7 +48,7 @@ class FAQSearch extends DataObject implements PermissionProvider
 
         $fields->addFieldsToTab('Root.Main', array(
             ReadonlyField::create('Term', 'Search term'),
-            ReadonlyField::create('TotalResults', 'Total results given'),
+            ReadonlyField::create('TotalResults', 'Total results found'),
             GridField::create(
                 'Results',
                 'Search results pages viewed',
