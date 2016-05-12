@@ -378,8 +378,8 @@ class FAQPage_Controller extends Page_Controller
             // Log the search query and result set for the query, link them to a session (ensure session is started)
             $sessID = session_id();
             if ($sessID) {
-                $trackingIDs = $this->getTrackingIDs($this->request->getVar('t'));
-                $trackingSearchID = $trackingIDs['trackingSearchID'];
+
+                $trackingSearchID = $this->findTrackingID($this->request);
 
                 // If the tracking ID is set then use existing search log if the log is for the same session
                 if ($trackingSearchID) {
@@ -469,6 +469,32 @@ class FAQPage_Controller extends Page_Controller
         $ids['trackingSearchID'] = (isset($parts[0])) ? $parts[0] : null;
         $ids['trackingResultsID'] = (isset($parts[1])) ? $parts[1] : null;
         return $ids;
+    }
+
+    /**
+     * Find the tracking ID to use when updating the search log.
+     *
+     * @param  SS_HTTPRequest $request Current request
+     * @return int                     The search log ID for the current search
+     */
+    public function findTrackingID(SS_HTTPRequest $request) {
+
+        // Use the GET param first
+        $trackingIDs = $this->getTrackingIDs($request->getVar('t'));
+        if ($trackingIDs['trackingSearchID'] != null) {
+            return $trackingIDs['trackingSearchID'];
+        }
+
+        // Check if a search within this session exists for the same query and use that tracking ID
+        // to prevent multiple search logs when back button used
+        $log = FAQSearch::get()->filter(array(
+            'SessionID' => session_id(),
+            'Term' => $request->getVar(self::$search_term_key)
+        ))->first();
+
+        if ($log && $log->exists()) {
+            return $log->ID;
+        }
     }
 
     /**

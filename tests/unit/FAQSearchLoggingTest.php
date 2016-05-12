@@ -90,6 +90,51 @@ class FAQSearchLoggingTest extends FunctionalTest
     }
 
     /**
+     * Search logs are reused for exactly the same search for the same user within the same search window.
+     */
+    public function testSearchTrackingDuplicates()
+    {
+        Phockito::include_hamcrest();
+
+        // Need to set session ID explicitly for running tests in CLI
+        $sessID = uniqid();
+        session_id($sessID);
+
+        $mockRequest = new SS_HTTPRequest('GET', '/', array(
+            FAQPage_Controller::$search_term_key => 'test terms'
+        ));
+        $mockResponse = array(
+            'Matches' => FAQSearchIndex_PaginatedList::create(ArrayList::create(array(
+                $this->objFromFixture('FAQ', 'one')
+            ))),
+            'Suggestion' => 'suggestion text'
+        );
+        $spy = Phockito::spy('FAQPage_Controller');
+        $spy->setRequest($mockRequest);
+        Phockito::when($spy)->getSearchQuery(anything())->return(new SearchQuery());
+        Phockito::when($spy)->doSearch(anything(), anything(), anything())->return(new ArrayData($mockResponse));
+
+        $response = $spy->search();
+        $searches = FAQSearch::get();
+
+        $this->assertEquals($searches->count(), 2);
+
+        $response = $spy->search();
+        $searches = FAQSearch::get();
+
+        // Still only 2 search logs generated as the same search for 'test terms' performed twice in same session
+        $this->assertEquals($searches->count(), 2);
+
+        session_id(uniqid());
+
+        $response = $spy->search();
+        $searches = FAQSearch::get();
+
+        // Same search for 'test terms' performed twice in different sessions
+        $this->assertEquals($searches->count(), 3);
+    }
+
+    /**
      * New article view log is created and linked to the search and results set log items with the same session.
      */
     public function testViewTracking()
