@@ -36,6 +36,7 @@ class FAQSearchBulkEditExtension extends DataExtension
                 $actionConfig
             );
 
-        $table->getConfig()->addComponent($bulk);
+        $table->getConfig()
+            ->addComponents($bulk);
     }
 }
