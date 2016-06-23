@@ -787,6 +787,7 @@ class FAQPage_Controller extends Page_Controller
                 'N' => 'Unhelpful'
             )),
             TextareaField::create('Comment'),
+            LiteralField::create('CharCounter', '<div class="faq__char-counter pull-right"></div>'),
             HiddenField::create('ID', ''),
             HoneypotField::create('MobilePhones_1', '') //Important name is not used on target data model
         );
