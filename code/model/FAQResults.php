@@ -118,24 +118,9 @@ class FAQResults extends DataObject
             ->where('ID IN (' . implode(',', $articleIDs) . ')')
             ->sort('FIELD(ID,' . implode(',', $articleIDs) .')');
 
-        $fields->addFieldsToTab('Root.Main', array(
-            ReadonlyField::create('SetSize', 'Size of this results set'),
-            GridField::create(
-                'FAQ',
-                'Article Set',
-                $articles,
-                $configSet = GridFieldConfig::create()
-            ),
-            GridField::create(
-                'Articles',
-                'Articles viewed',
-                $this->ArticlesViewed(),
-                $configView = GridFieldConfig::create()
-            )
-        ));
+        $fields->addFieldToTab('Root.Main', ReadonlyField::create('SetSize', 'Size of this results set'));
 
         $sort = new GridFieldSortableHeader();
-        $sort->setThrowExceptionOnBadDataType(false);
 
         $columns = new GridFieldDataColumns();
         $columns->setDisplayFields(array(
@@ -144,25 +129,43 @@ class FAQResults extends DataObject
             'Answer.FirstSentence' => 'Answer'
         ));
 
-        $configSet->addComponents(
-            new GridFieldButtonRow('before'),
-            new GridFieldToolbarHeader(),
-            $sort,
-            $columns,
-            new GridFieldEditButton(),
-            new GridFieldDetailForm(),
-            new GridFieldFooter()
-        );
+        if (!empty($articleIDs) && $articles->exists()) {
+            $fields->addFieldToTab('Root.Main', GridField::create(
+                'FAQ',
+                'Article Set',
+                $articles,
+                $configSet = GridFieldConfig::create()
+            ));
 
-        $configView->addComponents(
-            new GridFieldButtonRow('before'),
-            new GridFieldToolbarHeader(),
-            $sort,
-            new GridFieldDataColumns(),
-            new FAQResults_Article_EditButton(),
-            new FAQResults_Article_DetailForm(),
-            new GridFieldFooter()
-        );
+            $configSet->addComponents(
+                new GridFieldButtonRow('before'),
+                new GridFieldToolbarHeader(),
+                $sort,
+                $columns,
+                new GridFieldEditButton(),
+                new GridFieldDetailForm(),
+                new GridFieldFooter()
+            );
+        }
+        $articlesViewed = $this->ArticlesViewed();
+        if ($articlesViewed->exists()) {
+            $fields->addFieldToTab('Root.Main', GridField::create(
+                'Articles',
+                'Articles viewed',
+                $articlesViewed,
+                $configView = GridFieldConfig::create()
+            ));
+
+            $configView->addComponents(
+                new GridFieldButtonRow('before'),
+                new GridFieldToolbarHeader(),
+                $sort,
+                new GridFieldDataColumns(),
+                new FAQResults_Article_EditButton(),
+                new FAQResults_Article_DetailForm(),
+                new GridFieldFooter()
+            );
+        }
 
         return $fields;
     }
