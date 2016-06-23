@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Adds Archiving and Deleting for bulk actions, makes it much easier to archive or delete a long list of FAQ Search
+ * results
+ */
 class FAQSearchBulkEditExtension extends DataExtension
 {
 
@@ -7,16 +11,17 @@ class FAQSearchBulkEditExtension extends DataExtension
         $fields = $form->Fields();
         $table = $fields->dataFieldByName('FAQSearch');
 
+        // create the bulk manager container
         $bulk = new GridFieldBulkManager(null, false);
 
-        // config for the bulk actions
+        // config for the bulk actions, since they're both the same
         $actionConfig = array(
             'isAjax' => true,
             'icon' => 'decline',
             'isDestructive' => true
         );
 
-        // add Bulk Archive button
+        // add Bulk Archive and Bulk Delete buttons
         $bulk
             ->addBulkAction(
                 'archive',
