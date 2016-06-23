@@ -140,7 +140,7 @@ class FAQSearch extends DataObject implements PermissionProvider
 
     public function canDelete($member = false)
     {
-        return false;
+        return Permission::check('FAQ_DELETE_SEARCH_LOGS');
     }
 
     public function canCreate($member = false)
@@ -165,6 +165,16 @@ class FAQSearch extends DataObject implements PermissionProvider
                 'name' => _t(
                     'Faq.EditSearchLogsLabel',
                     'Edit FAQ search logs'
+                ),
+                'category' => _t(
+                    'Faq.Category',
+                    'FAQ'
+                ),
+            ),
+            'FAQ_DELETE_SEARCH_LOGS' => array(
+                'name' => _t(
+                    'Faq.DeleteSearchLogsLabel',
+                    'Delete FAQ search logs'
                 ),
                 'category' => _t(
                     'Faq.Category',
