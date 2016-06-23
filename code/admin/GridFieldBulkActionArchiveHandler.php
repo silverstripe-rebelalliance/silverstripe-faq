@@ -1,4 +1,8 @@
 <?php
+// do not want to load this handler if it cannot extend
+if (!class_exists('GridFieldBulkActionHandler')) {
+    return;
+}
 /**
  * Bulk action handler for archiving records.
  *
