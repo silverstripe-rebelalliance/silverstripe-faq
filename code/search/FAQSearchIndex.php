@@ -6,6 +6,8 @@
  */
 class FAQSearchIndex extends SolrIndex
 {
+    private static $include_suggestions = true;
+
     /**
      * Adds FAQ fields to the index
      */
@@ -51,17 +53,19 @@ class FAQSearchIndex extends SolrIndex
         $trackedMatches->setPageLength($matches->getPageLength());
         $result->setField('Matches', $trackedMatches);
 
-        // unescape suggestions
-        $unescapedSuggestions = self::unescapeQuery(
-            array(
-                $result->Suggestion,
-                $result->SuggestionNice,
-                $result->SuggestionQueryString,
-            )
-        );
-        $result->Suggestion = $unescapedSuggestions[0];
-        $result->SuggestionNice = $unescapedSuggestions[1];
-        $result->SuggestionQueryString = $unescapedSuggestions[2];
+        if ($this->stat('include_suggestions')) {
+            // unescape suggestions
+            $unescapedSuggestions = self::unescapeQuery(
+                array(
+                    $result->Suggestion,
+                    $result->SuggestionNice,
+                    $result->SuggestionQueryString,
+                )
+            );
+            $result->Suggestion = $unescapedSuggestions[0];
+            $result->SuggestionNice = $unescapedSuggestions[1];
+            $result->SuggestionQueryString = $unescapedSuggestions[2];
+        }
 
         return $result;
     }
