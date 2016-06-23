@@ -8,11 +8,24 @@
             $usefuls = $form.find('input[name="Useful"]'),
             $comment = $form.find('#Comment'),
             $actions = $form.find('.action'),
+            $counter = $form.find('.faq__char-counter'),
             existingComment = null;
 
+        var counterLimit = 255;
+
         $form.on('change', showHideComment);
+        $comment.on('keyup paste keydown change', ':input', function (e) {
+            var $input = $comment.find(':input'),
+                newValue = $input.val();
+
+            if (newValue.length > 255) {
+                $input.val(newValue.substring(0, 255));
+            }
+            showCharCount();
+        });
 
         showHideComment();
+        showCharCount();
 
         function showHideComment() {
             var $useful = $usefuls.filter(':checked');
@@ -35,6 +48,11 @@
                 $comment.hide();
                 $actions.prop('disabled', true);
             }
+        }
+
+        function showCharCount() {
+            var charUsed = $comment.find(':input').val().length;
+            $counter.html('You have ' + (counterLimit - charUsed) + ' characters left');
         }
     });
 }(jQuery));
