@@ -26,6 +26,10 @@ class FAQ extends DataObject implements PermissionProvider
         'Category' => 'TaxonomyTerm'
     );
 
+    private static $has_many = array(
+        'Views' => 'FAQResults_Article'
+    );
+
     /**
      * Search boost defaults for fields.
      *
@@ -102,6 +106,16 @@ class FAQ extends DataObject implements PermissionProvider
             )
         );
         $fields->addFieldToTab('Root.Main', $categoryField);
+
+        $fields->addFieldToTab('Root.Views',
+            GridField::create(
+                'Views',
+                'Views',
+                $this->Views(),
+                GridFieldConfig_RecordViewer::create()
+            )
+        );
+
         return $fields;
     }
 
