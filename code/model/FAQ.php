@@ -13,7 +13,8 @@ class FAQ extends DataObject implements PermissionProvider
     private static $db = array(
         'Question' => 'Varchar(255)',
         'Answer' => 'HTMLText',
-        'Keywords' => 'Text'
+        'Keywords' => 'Text',
+        'TotalViews' => 'Int'
     );
 
     private static $summary_fields = array(
