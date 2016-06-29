@@ -180,7 +180,17 @@ class FAQSearch extends DataObject implements PermissionProvider
                     'Faq.Category',
                     'FAQ'
                 ),
-            )
+            ),
+            'FAQ_IGNORE_SEARCH_LOGS' => array(
+                'name' => _t(
+                    'Faq.IgnoreSearchLogsLabel',
+                    'Ignore search logs for this user'
+                ),
+                'category' => _t(
+                    'Faq.Category',
+                    'FAQ'
+                ),
+            ),
         );
     }
 }

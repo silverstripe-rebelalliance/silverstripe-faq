@@ -297,7 +297,7 @@ class FAQPage_Controller extends Page_Controller
         $ratingForm = null;
         $query = null;
 
-        if ($sessID && $request->getVar('t')) {
+        if ($sessID && $request->getVar('t') && Permission::check('FAQ_IGNORE_SEARCH_LOGS') == false) {
             $trackingIDs = $this->getTrackingIDs($request->getVar('t'));
 
             // If there is an article log for the same article attached to the search and results set logs, reuse it
@@ -377,7 +377,7 @@ class FAQPage_Controller extends Page_Controller
 
             // Log the search query and result set for the query, link them to a session (ensure session is started)
             $sessID = session_id();
-            if ($sessID) {
+            if ($sessID && Permission::check('FAQ_IGNORE_SEARCH_LOGS') == false) {
 
                 $trackingSearchID = $this->findTrackingID($this->request);
 
