@@ -178,6 +178,13 @@ class FAQResults_Article extends DataObject
 {
     private static $singular_name = 'Article';
 
+    /**
+     * Whether to count a new view for the FAQ
+     *
+     * @var boolean
+     */
+    private $countView = false;
+
     private static $has_one = array(
         'FAQ' => 'FAQ',
         'ResultSet' => 'FAQResults'
@@ -209,6 +216,28 @@ class FAQResults_Article extends DataObject
     public function getTitle()
     {
         return "Feedback to '{$this->FAQ()->Question}'";
+    }
+
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+        // Count a view only on first write
+        if (!$this->ID) {
+            $this->countView = true;
+        }
+    }
+
+    public function onAfterWrite()
+    {
+        parent::onAfterWrite();
+
+        if ($this->countView) {
+            $faq = $this->FAQ();
+            if ($faq && $faq->exists()) {
+                $faq->TotalViews = $faq->TotalViews + 1;
+                $faq->write();
+            }
+        }
     }
 }
 
