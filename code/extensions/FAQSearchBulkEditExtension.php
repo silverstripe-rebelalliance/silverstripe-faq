@@ -14,26 +14,27 @@ class FAQSearchBulkEditExtension extends DataExtension
         // create the bulk manager container
         $bulk = new GridFieldBulkManager(null, false);
 
-        // config for the bulk actions, since they're both the same
-        $actionConfig = array(
-            'isAjax' => true,
-            'icon' => 'decline',
-            'isDestructive' => true
-        );
-
         // add Bulk Archive and Bulk Delete buttons
         $bulk
             ->addBulkAction(
                 'archive',
                 _t('GRIDFIELD_BULK_MANAGER.ARCHIVE_SELECT_LABEL', 'Archive'),
                 null,
-                $actionConfig
+                array(
+                    'isAjax' => true,
+                    'icon' => 'cross',
+                    'isDestructive' => true
+                )
             )
             ->addBulkAction(
                 'delete',
                 _t('GRIDFIELD_BULK_MANAGER.DELETE_SELECT_LABEL', 'Delete'),
                 null,
-                $actionConfig
+                array(
+                    'isAjax' => true,
+                    'icon' => 'decline',
+                    'isDestructive' => true
+                )
             );
 
         $table->getConfig()
