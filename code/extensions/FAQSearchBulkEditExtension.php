@@ -23,7 +23,7 @@ class FAQSearchBulkEditExtension extends DataExtension
                 array(
                     'isAjax' => true,
                     'icon' => 'cross',
-                    'isDestructive' => true
+                    'isDestructive' => false
                 )
             )
             ->addBulkAction(
