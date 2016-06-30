@@ -65,6 +65,10 @@ class FAQSearchIndex extends SolrIndex
             $result->Suggestion = $unescapedSuggestions[0];
             $result->SuggestionNice = $unescapedSuggestions[1];
             $result->SuggestionQueryString = $unescapedSuggestions[2];
+        } else {
+            $result->Suggestion = '';
+            $result->SuggestionNice = '';
+            $result->SuggestionQueryString = '';
         }
 
         return $result;
