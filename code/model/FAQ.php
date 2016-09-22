@@ -106,7 +106,13 @@ class FAQ extends DataObject implements PermissionProvider
                 $taxonomyRoot->ID
             )
         );
-        $fields->addFieldToTab('Root.Main', $categoryField);
+        $fields->addFieldsToTab(
+            'Root.Main',
+            array(
+                $categoryField,
+                ReadonlyField::create('TotalViews', 'TotalViews', $this->TotalViews)
+            )
+        );
 
         $fields->addFieldToTab('Root.Views',
             GridField::create(
