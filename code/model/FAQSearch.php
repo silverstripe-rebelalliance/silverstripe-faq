@@ -248,6 +248,13 @@ class FAQSearch_SearchContext extends SearchContext
 
         $this->addField($useful);
 
+        // filter for rating comments
+        $this->addField(
+            DropdownField::create('RatingComment', 'Whether articles were commented on', array(
+                'WithComment' => 'Has comments'
+            ))->setEmptyString('Any')
+        );
+
         // filter if any results were returned
         $results = new DropdownField('HasResults', 'Has results', array('results' => 'With results', 'noresults' => 'Without results'));
         $results->setEmptyString('Any');
@@ -280,6 +287,11 @@ class FAQSearch_SearchContext extends SearchContext
         if (isset($params['IsArchived']) && $params['IsArchived']) {
             $archived = (isset($params['IsArchived']) && $params['IsArchived'] == 'archived');
             $list = $list->filter('Archived', $archived);
+        }
+
+        if (isset($params['RatingComment']) && $params['RatingComment']) {
+            // Need to include the filter to ensure the table is joined
+            $list = $list->filter('Articles.ID:GreaterThan', 0)->where("\"FAQResults_Article\".\"Comment\" IS NOT NULL");
         }
 
         return $list;
