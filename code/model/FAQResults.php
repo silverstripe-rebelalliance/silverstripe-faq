@@ -178,6 +178,8 @@ class FAQResults_Article extends DataObject
 {
     private static $singular_name = 'Article';
 
+    private static $default_sort = 'Created DESC';
+
     /**
      * Whether to count a new view for the FAQ
      *
