@@ -2,7 +2,7 @@
     "name": "d-rivera-c/silverstripe-faq",
     "description": "Provides Q & A pages and search",
     "type": "silverstripe-module",
-    "homepage": "https://code.platform.silverstripe.com/supervillains/silverstripe-faq",
+    "homepage": "https://github.com/d-rivera-c/silverstripe-faq",
     "keywords": ["silverstripe", "search", "faq", "solr"],
     "license": "BSD-3-Clause",
     "support": {
