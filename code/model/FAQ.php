@@ -110,7 +110,7 @@ class FAQ extends DataObject implements PermissionProvider
             'Root.Main',
             array(
                 $categoryField,
-                ReadonlyField::create('TotalViews', 'TotalViews', $this->TotalViews)
+                ReadonlyField::create('TotalViews', 'Total Views', $this->TotalViews)
             )
         );
 
