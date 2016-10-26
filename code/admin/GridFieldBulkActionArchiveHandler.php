@@ -14,19 +14,19 @@ class GridFieldBulkActionArchiveHandler extends GridFieldBulkActionHandler
 {
     /**
      * RequestHandler allowed actions
+     *
      * @var array
      */
     private static $allowed_actions = array('archive');
 
-
     /**
      * RequestHandler url => action map
+     *
      * @var array
      */
     private static $url_handlers = array(
         'archive' => 'archive'
     );
-
 
     /**
      * Archive the selected records passed from the archive bulk action

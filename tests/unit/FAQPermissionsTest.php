@@ -161,7 +161,7 @@ class FAQPermissionsTest extends FunctionalTest
     public function testLogDeleting()
     {
         $this->loginAs($this->admin);
-        $this->assertFalse($this->log->canDelete());
+        $this->assertTrue($this->log->canDelete());
         $this->assertFalse($this->logResults->canDelete());
         $this->assertFalse($this->logArticle->canDelete());
         $this->logOut();
@@ -173,7 +173,7 @@ class FAQPermissionsTest extends FunctionalTest
         $this->logOut();
 
         $this->loginAs($this->author);
-        $this->assertFalse($this->log->canDelete());
+        $this->assertTrue($this->log->canDelete());
         $this->assertFalse($this->logResults->canDelete());
         $this->assertFalse($this->logArticle->canDelete());
         $this->logOut();

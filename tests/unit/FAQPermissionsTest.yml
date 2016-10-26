@@ -82,3 +82,6 @@ Permission:
   editLogs:
     Code: FAQ_EDIT_SEARCH_LOGS
     GroupID: =>Group.contentAuthors
+  deleteLogs:
+    Code: FAQ_DELETE_SEARCH_LOGS
+    GroupID: =>Group.contentAuthors

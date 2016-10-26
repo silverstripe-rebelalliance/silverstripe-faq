@@ -81,9 +81,6 @@ class FAQ extends DataObject implements PermissionProvider
         );
     }
 
-    /**
-     *
-     */
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();

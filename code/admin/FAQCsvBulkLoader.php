@@ -44,6 +44,7 @@ class FAQCsvBulkLoader extends CsvBulkLoader
     /**
      * Avoids creating new categories if not found in the root taxonomy by default.
      * It will get the right CategoryID link, or leave the FAQ without categories.
+     *
      * @param $obj
      * @param $val
      * @param $record

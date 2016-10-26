@@ -2,11 +2,10 @@
 
 /**
  * Adds Archiving and Deleting for bulk actions, makes it much easier to archive or delete a long list of FAQ Search
- * results
+ * results.
  */
 class FAQSearchBulkEditExtension extends DataExtension
 {
-
     public function updateEditForm(&$form) {
         $fields = $form->Fields();
         $table = $fields->dataFieldByName('FAQSearch');

@@ -102,8 +102,21 @@ Featured FAQs appear on the FAQ Page before a user performs a search. These can 
 - [Configuring Solr](docs/en/configure-solr.md)
 - [Using CWP](docs/en/cwp.md)
 
+#### Search logging
+
+FAQ searches performed on the FAQ page are logged so that a record is kept of the search term used and the results pages and FAQ articles that were viewed as a result of the search. There is also functionality to rate and leave a comment about an FAQ article.
+
+All of this search data is available in the CMS in the "Search Log" section. CMS users can filter the data on numerous criteria and drill into results to find and rectify gaps in the knowledge base.
+
+There are convenient links through to FAQ articles for content authors to amend the content and keywords for an article in order to boost the article higher in search results for appropriate search terms.
+
+To connect all of this data together a session ID is associated with each record along with a search log ID passed as a GET param. This helps to prevent the data integrity being corrupted when URLs are shared between browsers and sessions. Further description of the functionality is described in the FAQ search logging unit test.
+
 ## TODO
 
 - Get static config variables from yml files for controller
 - Pagetypes, search index and dataobjects easily extendable
-- version FAQs (?)
+- version FAQs or move to inherit from SiteTree
+- cwp manual configuration if not using `cwp-version`
+- make this a supported SS module
+- Better approach for archiving search logs and related data
