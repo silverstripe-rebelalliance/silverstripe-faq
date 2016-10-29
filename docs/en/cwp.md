@@ -7,7 +7,7 @@ If your using the module with CWP, extra requirements should be noticed (even if
 
 Also notice that some custom search configurations from CWP don't apply to FAQs out of the box.
 Manual configuration will need to be applied to make it resemble CWP conf.
-There's a [`cwp-version` tag](https://github.com/d-rivera-c/silverstripe-faq/releases/tag/cwp-version)
+There's a [cwp version tag](https://github.com/d-rivera-c/silverstripe-faq/releases/tag/0.9.0)
 that doesn't require any other configuration, but will not get future updates.
 
 #### Using the main branch
