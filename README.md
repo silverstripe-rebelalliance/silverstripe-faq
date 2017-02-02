@@ -1,10 +1,10 @@
 # FAQ
-[![Build Status](https://api.travis-ci.org/d-rivera-c/silverstripe-faq.svg?branch=master)](https://travis-ci.org/d-rivera-c/silverstripe-faq)
-[![Latest Stable Version](https://poser.pugx.org/d-rivera-c/silverstripe-faq/version.svg)](https://github.com/d-rivera-c/silverstripe-faq/releases)
-[![Total Downloads](https://poser.pugx.org/d-rivera-c/silverstripe-faq/downloads.svg)](https://packagist.org/packages/d-rivera-c/silverstripe-faq)
-[![License](https://poser.pugx.org/d-rivera-c/silverstripe-faq/license.svg)](https://github.com/d-rivera-c/silverstripe-faq/blob/master/LICENSE.md)
-[![Dependency Status](https://www.versioneye.com/php/d-rivera-c:silverstripe-faq/badge.svg)](https://www.versioneye.com/php/d-rivera-c:silverstripe-faq)
-[![Reference Status](https://www.versioneye.com/php/d-rivera-c:silverstripe-faq/reference_badge.svg)](https://www.versioneye.com/php/d-rivera-c:silverstripe-faq/references)
+[![Build Status](https://api.travis-ci.org/silverstripe/silverstripe-faq.svg?branch=master)](https://travis-ci.org/silverstripe/silverstripe-faq)
+[![Latest Stable Version](https://poser.pugx.org/silverstripe/silverstripe-faq/version.svg)](https://github.com/silverstripe/silverstripe-faq/releases)
+[![Total Downloads](https://poser.pugx.org/silverstripe/silverstripe-faq/downloads.svg)](https://packagist.org/packages/silverstripe/silverstripe-faq)
+[![License](https://poser.pugx.org/silverstripe/silverstripe-faq/license.svg)](https://github.com/silverstripe/silverstripe-faq/blob/master/LICENSE.md)
+[![Dependency Status](https://www.versioneye.com/php/silverstripe:silverstripe-faq/badge.svg)](https://www.versioneye.com/php/silverstripe:silverstripe-faq)
+[![Reference Status](https://www.versioneye.com/php/silverstripe:silverstripe-faq/reference_badge.svg)](https://www.versioneye.com/php/silverstripe:silverstripe-faq/references)
 
 ## Introduction
 
@@ -24,7 +24,7 @@ and has its own file for stopwords and synonyms.
 
 ## Installation
 
-    composer install d-rivera-c/silverstripe-faq
+    composer install silverstripe/silverstripe-faq
 
 Run a database rebuild by visiting *http://yoursite.com/dev/build*. This will add the required database
 columns and tables for the module to function.

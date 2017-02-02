@@ -1,36 +1,36 @@
 {
-    "name": "d-rivera-c/silverstripe-faq",
+    "name": "silverstripe/silverstripe-faq",
     "description": "Provides Q&A pages and Solr-based search",
     "type": "silverstripe-module",
-    "homepage": "https://github.com/d-rivera-c/silverstripe-faq",
+    "homepage": "https://github.com/silverstripe/silverstripe-faq",
     "keywords": ["silverstripe", "search", "faq", "solr"],
     "license": "BSD-3-Clause",
     "support": {
-        "issues": "https://github.com/d-rivera-c/silverstripe-faq/issues"
+        "issues": "https://github.com/silverstripe/silverstripe-faq/issues"
     },
     "authors": [
         {
-            "name": "wgodfrey",
-            "email": "wilfred@silverstripe.com"
+            "name": "SilverStripe Ltd",
+            "homepage": "http://www.silverstripe.com"
         },
         {
-            "name": "drivera",
-            "email": "denise@silverstripe.com"
+            "name": "Denise Rivera",
+            "homepage": "https://github.com/d-rivera-c"
         }
     ],
     "require": {
-		"undefinedoffset/sortablegridfield": "*",
-		"silverstripe/fulltextsearch": "^2.1.0",
-		"silverstripe/taxonomy": "^1.0"
+        "undefinedoffset/sortablegridfield": "^0.6.0",
+        "silverstripe/fulltextsearch": "^2.1.0",
+        "silverstripe/taxonomy": "^1.0"
     },
     "require-dev": {
-		"phpunit/phpunit": "3.7.*@stable",
+        "phpunit/phpunit": "3.7.*@stable",
         "hafriedlander/phockito": "dev-master"
     },
     "suggest": {
         "silverstripe/fulltextsearch-localsolr": "For local testing of Solr"
     },
-	"extra": {
-		"installer-name": "faq"
-	}
+    "extra": {
+        "installer-name": "faq"
+    }
 }
