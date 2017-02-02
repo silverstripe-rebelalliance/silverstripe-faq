@@ -1,5 +1,5 @@
 {
-    "name": "silverstripe/silverstripe-faq",
+    "name": "silverstripe/faq",
     "description": "Provides Q&A pages and Solr-based search",
     "type": "silverstripe-module",
     "homepage": "https://github.com/silverstripe/silverstripe-faq",
