@@ -93,6 +93,7 @@ class FAQPageTest extends FunctionalTest
      */
     public function testView()
     {
+
         // test routing
         $page = $this->get('faq-page-1/view/1');
         $this->assertEquals(200, $page->getStatusCode());
@@ -100,13 +101,20 @@ class FAQPageTest extends FunctionalTest
         $page = $this->get('faq-page-1/view/665');
         $this->assertEquals(404, $page->getStatusCode());
 
-        // test page body, we have to get the Q and the A
-        $response = $this->get('faq-page-1/view/1');
-        $this->assertTrue(strpos($response->getBody(), 'question 1') !== false);
-        $this->assertTrue(strpos($response->getBody(), 'Milkyway chocolate bar') !== false);
+        // Ensure requests retrieve the correct FAQ
+        $request = new SS_HTTPRequest('GET', 'faq-page-1/view/1');
+        $request->setRouteParams(array('ID' => 1));
+        $result = $this->controller->view($request);
 
-        $response = $this->get('faq-page-1/view/2');
-        $this->assertTrue(strpos($response->getBody(), 'No imagination question') !== false);
+        $this->assertEquals($result['FAQ']->Question, 'question 1');
+        $this->assertEquals($result['FAQ']->Answer, 'Milkyway chocolate bar');
+
+        $request = new SS_HTTPRequest('GET', 'faq-page-1/view/2');
+        $request->setRouteParams(array('ID' => 2));
+        $result = $this->controller->view($request);
+
+        $this->assertEquals($result['FAQ']->Question, 'No imagination question');
+        $this->assertEquals($result['FAQ']->Answer, '42');
     }
 
     /**
