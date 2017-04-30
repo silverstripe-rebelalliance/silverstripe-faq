@@ -5,143 +5,273 @@
  *
  * @see FAQAdmin for FAQ ModelAdmin.
  */
-class FAQ extends DataObject {
-	private static $db = array(
-		'Question' => 'Varchar(255)',
-		'Answer' => 'HTMLText',
-		'Keywords' => 'Text'
-	);
-	
-	private static $summary_fields = array(
-		'Question' => 'Question',
-		'Answer.Summary' => 'Answer',
-		'Category.Name' => 'Category'
-	);
-	
-	private static $has_one = array(
-		'Category' => 'TaxonomyTerm'
-	);
+class FAQ extends DataObject implements PermissionProvider
+{
 
-	/**
-	 * Search boost for questions.
-	 * @config
-	 */
-	private static $question_boost = '3';
+    private static $singular_name = 'FAQ';
 
-	/**
-	 * Search boost for answer
-	 * @config
-	 */
-	private static $answer_boost = '1';
+    private static $db = array(
+        'Question' => 'Varchar(255)',
+        'Answer' => 'HTMLText',
+        'Keywords' => 'Text',
+        'TotalViews' => 'Int'
+    );
 
-	/**
-	 * Search boost for keywords
-	 * @config
-	 */
-	private static $keywords_boost = '4';
+    private static $summary_fields = array(
+        'Question' => 'Question',
+        'Answer.FirstSentence' => 'Answer',
+        'Category.Name' => 'Category'
+    );
 
-	/**
-	 * Name of the taxonomy to use for categories
-	 * @config
-	 */
-	private static $taxonomy_name = 'FAQ Categories';
-	
-	/**
-	 * Add fields to manage FAQs.
-	 *
-	 * @return $fields
-	 */
-	public function getCMSFields() {
-		$fields = parent::getCMSFields();
-		$this->extend('beforeGetCMSFields', $fields);
+    private static $has_one = array(
+        'Category' => 'TaxonomyTerm'
+    );
 
-		// setup category dropdown field
-		$taxonomyRoot = self::getRootCategory();
-		$categoryField = new TreeDropdownField(
-			'CategoryID', 
-			'Category', 
-			'TaxonomyTerm',
-			'ID',
-			'Name'
-		);
-		//change this to 0 if you want the root category to show
-		$categoryField->setTreeBaseID($taxonomyRoot->ID);
-		$categoryField->setDescription(sprintf(
-					'Select one <a href="admin/taxonomy/TaxonomyTerm/EditForm/field/TaxonomyTerm/item/%d/#Root_Children">'
-					. 'FAQ Category</a>',
-					$taxonomyRoot->ID));
-		$fields->addFieldToTab('Root.Main', $categoryField);
-		
-		$this->extend('updateGetCMSFields', $fields);
-		return $fields;
-	}
+    private static $has_many = array(
+        'Views' => 'FAQResults_Article'
+    );
 
-	/**
-	 * Set required fields for model form submission.
-	 *
-	 * @return RequiredFields
-	 */
-	public function getCMSValidator() {
-		return new RequiredFields('Question', 'Answer');
-	}
+    /**
+     * Search boost defaults for fields.
+     *
+     * @config
+     * @var    config
+     * @string
+     */
+    private static $question_boost = '3';
 
+    /**
+     * @config
+     */
+    private static $answer_boost = '1';
 
-	/**
-	 * Filters items based on member permissions or other criteria,
-	 * such as if a state is generally available for the current record.
-	 * 
-	 * @param Member
-	 * @return Boolean
-	 */
-	public function canView($member = null) {
-		$canView = true;
-		$this->extend('updateCanView', $member, $canView);
-		return $canView;
-	}
+    /**
+     * @config
+     */
+    private static $keywords_boost = '4';
 
-	/**
-	 * Gets a link to the view page for each FAQ
-	 * 
-	 * @return string Link to view this particular FAQ on the current FAQPage.
-	 */
-	public function getLink() {
-		$faqPage = Controller::curr();
+    /**
+     * @config
+     */
+    private static $taxonomy_name = 'FAQ Categories';
 
-		if (!$faqPage->exists() || $this->ID <= 0) {
-			return '';
-		}
+    /**
+     * Creates a custom FAQSearch search object, can override to prevent the field removals
+     *
+     * @return FAQSearch_SearchContext
+     */
+    public function getDefaultSearchContext()
+    {
+        $fields = $this->scaffoldSearchFields();
+        $filters = $this->defaultSearchFilters();
 
-		$this->extend('updateGetLink', $faqPage);
-		return Controller::join_links(
-			$faqPage->Link(),
-			"view/",
-			$this->ID
-		);
-	}
+        $fields->removeByName('Category');
+        $categories = self::getRootCategory()->Children()->map('Name');
+        $fields->push(
+            DropdownField::create('Category__Name', 'Category Name', $categories)
+            ->setEmptyString('(Any)')
+        );
 
-	/**
-	 * Gets all nested categories for FAQs
-	 *
-	 * @return ArrayList
-	 */
-	public static function getAllCategories() {
-		Deprecation::notice('2.0', 'getAllCategories is deprecated. Create extended function');
-		$taxName = Config::inst()->get('FAQ', 'taxonomy_name');
-		$root = FAQTaxonomyTermExtension::getOrCreate(array('Name'=> $taxName),
-										  array('Name'=> $taxName, 'ParentID'=> 0));
-		return $root->Children();
-	}
-	
-	/**
-	 * Gets the root category for the FAQs
-	 * If it doesn't find it it creates it
-	 *
-	 * @return null|TaxonomyTerm root category of FAQs
-	 */
-	public static function getRootCategory() {
-		$taxName = Config::inst()->get('FAQ', 'taxonomy_name');
-		$root = FAQTaxonomyTermExtension::getOrCreate(array('Name'=> $taxName),
-										  array('Name'=> $taxName, 'ParentID'=> 0));
-		return $root;
-	}
+        $filters['Category.Name'] = ExactMatchFilter::create('Category.Name');
+
+        return new SearchContext(
+            $this->class,
+            $fields,
+            $filters
+        );
+    }
+
+    public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+
+        // setup category dropdown field
+        $taxonomyRoot = self::getRootCategory();
+        $categoryField = new TreeDropdownField(
+            'CategoryID',
+            'Category',
+            'TaxonomyTerm',
+            'ID',
+            'Name'
+        );
+        //change this to 0 if you want the root category to show
+        $categoryField->setTreeBaseID($taxonomyRoot->ID);
+        $categoryField->setDescription(
+            sprintf(
+                'Select one <a href="admin/taxonomy/TaxonomyTerm/EditForm/field/TaxonomyTerm/item/%d/#Root_Children">'
+                . 'FAQ Category</a>',
+                $taxonomyRoot->ID
+            )
+        );
+        $fields->addFieldsToTab(
+            'Root.Main',
+            array(
+                $categoryField,
+                ReadonlyField::create('TotalViews', 'Total Views', $this->TotalViews)
+            )
+        );
+
+        $fields->addFieldToTab('Root.Views',
+            GridField::create(
+                'Views',
+                'Views',
+                $this->Views(),
+                GridFieldConfig_RecordViewer::create()
+            )
+        );
+
+        return $fields;
+    }
+
+    /**
+     * Set required fields for model form submission.
+     */
+    public function getCMSValidator()
+    {
+        return new RequiredFields('Question', 'Answer');
+    }
+
+    /**
+     * Gets a link to the view page for each FAQ. If the tracking ID is set on
+     * this object include it as a GET param in the link to this article.
+     *
+     * @return string Link to view this particular FAQ on the current FAQPage.
+     */
+    public function getLink()
+    {
+        $faqPage = FAQPage::get()->first();
+        $link = '';
+
+        if ($faqPage->exists() && $this->ID != 0) {
+            // Include tracking ID if it is set
+            if (isset($this->trackingID) && $this->trackingID) {
+                $link = Controller::join_links(
+                    $faqPage->Link(),
+                    "view/",
+                    $this->ID,
+                    '?t=' . $this->trackingID
+                );
+            } else {
+                $link = Controller::join_links(
+                    $faqPage->Link(),
+                    "view/",
+                    $this->ID
+                );
+            }
+        }
+
+        return $link;
+    }
+
+    public function getTitle() {
+        if ($this->Question) {
+            return $this->Question;
+        }
+        return parent::getTitle();
+    }
+
+    /**
+     * @return string "Read more" link text for the current FAQPage.
+     */
+    public function getMoreLinkText()
+    {
+        $faqPage = Controller::curr();
+
+        if ($faqPage->exists() && $faqPage->ClassName === 'FAQPage') {
+            return $faqPage->MoreLinkText;
+        }
+
+        return '';
+    }
+
+    /**
+     * Gets all nested categories for FAQs
+     * TODO: this, if it's required by SUP-75 or SUP-76, if not, delete
+     */
+    public static function getAllCategories()
+    {
+        $taxName = Config::inst()->get('FAQ', 'taxonomy_name');
+        $root = FAQTaxonomyTermExtension::getOrCreate(
+            array('Name'=> $taxName),
+            array('Name'=> $taxName, 'ParentID'=> 0)
+        );
+        return $root->Children();
+    }
+
+    /**
+     * Gets the root category for the FAQs
+     * If it doesn't find it it creates it
+     */
+    public static function getRootCategory()
+    {
+        $taxName = Config::inst()->get('FAQ', 'taxonomy_name');
+        $root = FAQTaxonomyTermExtension::getOrCreate(
+            array('Name'=> $taxName),
+            array('Name'=> $taxName, 'ParentID'=> 0)
+        );
+        return $root;
+    }
+
+    /**
+     * Filters items based on member permissions or other criteria,
+     * such as if a state is generally available for the current record.
+     *
+     * @param  Member
+     * @return Boolean
+     */
+    public function canView($member = null)
+    {
+        return true;
+    }
+
+    public function canEdit($member = null)
+    {
+        return Permission::check('FAQ_EDIT');
+    }
+
+    public function canDelete($member = null)
+    {
+        return Permission::check('FAQ_DELETE');
+    }
+
+    public function canCreate($member = null)
+    {
+        return Permission::check('FAQ_CREATE');
+    }
+
+    public function providePermissions()
+    {
+        return array(
+            'FAQ_EDIT' => array(
+                'name' => _t(
+                    'Faq.EditPermissionLabel',
+                    'Edit FAQs'
+                ),
+                'category' => _t(
+                    'Faq.Category',
+                    'FAQ'
+                ),
+            ),
+            'FAQ_DELETE' => array(
+                'name' => _t(
+                    'Faq.DeletePermissionLabel',
+                    'Delete FAQs'
+                ),
+                'category' => _t(
+                    'Faq.Category',
+                    'FAQ'
+                ),
+            ),
+            'FAQ_CREATE' => array(
+                'name' => _t(
+                    'Faq.CreatePermissionLabel',
+                    'Create FAQs'
+                ),
+                'category' => _t(
+                    'Faq.Category',
+                    'FAQ'
+                ),
+            )
+        );
+    }
 }

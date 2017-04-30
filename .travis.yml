@@ -1,26 +1,25 @@
 language: php
 php:
- - 5.6
+  - '5.6'
 
 sudo: false
 
 env:
- - DB=MYSQL CORE_RELEASE=3.2
- - DB=MYSQL CORE_RELEASE=3.3
- - DB=MYSQL CORE_RELEASE=3.4
- - DB=MYSQL CORE_RELEASE=master
- - DB=SQLITE3 CORE_RELEASE=3.4
- 
+  matrix:
+    - DB=MYSQL CORE_RELEASE=3.4 COMPOSER_ALLOW_XDEBUG=0
+    - DB=MYSQL CORE_RELEASE=3.5 COMPOSER_ALLOW_XDEBUG=0
+    - DB=MYSQL CORE_RELEASE=master COMPOSER_ALLOW_XDEBUG=0
+
 matrix:
   allow_failures:
-    - env: DB=MYSQL CORE_RELEASE=master
- 
+    - env: DB=MYSQL CORE_RELEASE=master COMPOSER_ALLOW_XDEBUG=0
+
 before_script:
- - phpenv rehash
- - composer self-update || true
- - git clone git://github.com/silverstripe-labs/silverstripe-travis-support.git ~/travis-support
- - php ~/travis-support/travis_setup.php --source `pwd` --target ~/builds/ss --require silverstripe/installer
- - cd ~/builds/ss
+  - phpenv rehash
+  - composer self-update || true
+  - git clone git://github.com/silverstripe-labs/silverstripe-travis-support.git ~/travis-support
+  - php ~/travis-support/travis_setup.php --source `pwd` --target ~/builds/ss --require silverstripe/installer:~3
+  - cd ~/builds/ss
 
 script:
- - vendor/bin/phpunit faq/tests/
+  - vendor/bin/phpunit faq/tests/
