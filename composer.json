@@ -19,7 +19,7 @@
         }
     ],
     "require": {
-        "undefinedoffset/sortablegridfield": "^0.6.0",
+        "undefinedoffset/sortablegridfield": "*",
         "silverstripe/fulltextsearch": "^2.1.0",
         "silverstripe/taxonomy": "^1.0"
     },
