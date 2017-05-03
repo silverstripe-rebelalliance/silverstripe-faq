@@ -5,7 +5,7 @@
  *
  * @see FAQAdmin for FAQ ModelAdmin.
  */
-class FAQ extends DataObject implements PermissionProvider
+class FAQ extends Page implements PermissionProvider
 {
 
     private static $singular_name = 'FAQ';
@@ -128,7 +128,8 @@ class FAQ extends DataObject implements PermissionProvider
      */
     public function getCMSValidator()
     {
-        return new RequiredFields('Question', 'Answer');
+        // TODO: Need a hook to update the validator here
+        // return new RequiredFields('Question', 'Answer');
     }
 
     /**
