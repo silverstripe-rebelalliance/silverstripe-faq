@@ -103,22 +103,23 @@ class FAQ extends DataObject implements PermissionProvider
                 $taxonomyRoot->ID
             )
         );
-        $fields->addFieldsToTab(
+        $fields->addFieldToTab(
             'Root.Main',
-            array(
-                $categoryField,
-                ReadonlyField::create('TotalViews', 'Total Views', $this->TotalViews)
-            )
+            $categoryField,
+            'Question'
         );
 
-        $fields->addFieldToTab('Root.Views',
+        $fields->addFieldsToTab('Root.Views', array(
+            ReadonlyField::create('TotalViews', 'Total Views', $this->TotalViews),
             GridField::create(
                 'Views',
                 'Views',
                 $this->Views(),
                 GridFieldConfig_RecordViewer::create()
             )
-        );
+        ));
+
+        $this->extend('updateFAQCMSFields', $fields);
 
         return $fields;
     }
