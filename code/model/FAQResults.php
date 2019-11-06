@@ -277,7 +277,7 @@ class FAQResults_Article_DetailForm extends GridFieldDetailForm
 
         $class = $this->getItemRequestClass();
 
-        $handler = Object::create($class, $gridField, $this, $record, $requestHandler, $this->name);
+        $handler = SS_Object::create($class, $gridField, $this, $record, $requestHandler, $this->name);
         $handler->setTemplate($this->template);
 
         // if no validator has been set on the GridField and the record has a
@@ -356,4 +356,3 @@ class FAQResults_Article_DetailForm_ItemRequest extends GridFieldDetailForm_Item
         }
     }
 }
-
